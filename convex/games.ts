@@ -1,5 +1,6 @@
 import { v } from "convex/values"
-import { internalMutation, mutation, query } from "./_generated/server"
+import { mutation, query } from "./_generated/server"
+import { Doc } from "./_generated/dataModel"
 
 // Generate a random 6-character game code
 function generateGameCode(): string {
@@ -10,63 +11,68 @@ function generateGameCode(): string {
   }
   return code
 }
-
 // Create a new game
+export const getUserGames = query({
+  args: { email: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity()
+
+    let playerRecords: Doc<"players">[] = [];
+    if (identity) {
+      playerRecords = await ctx.db.query("players").filter(q => q.eq(q.field("clerkId"), identity.subject)).collect();
+    } else if (args.email) {
+      playerRecords = await ctx.db.query("players").filter(q => q.eq(q.field("email"), args.email)).collect();
+    }
+
+    if (playerRecords.length === 0) return [];
+
+    // Fetch unique games
+    const gameIds = [...new Set(playerRecords.map(p => p.gameId))];
+
+    const games: Doc<"games">[] = [];
+    for (const id of gameIds) {
+      const game = await ctx.db.get(id);
+      if (game) games.push(game);
+    }
+
+    return games.sort((a, b) => (b.finishedAt || b._creationTime) - (a.finishedAt || a._creationTime));
+  }
+})
+
 export const createGame = mutation({
   args: {},
   handler: async (ctx, _) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (identity === null || !identity.subject || !identity.email || !identity.givenName) {
-      throw new Error("Not authenticated or missing user information");
-    }
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity) throw new Error("Unauthorized")
 
-    // Generate unique code
-    let code = generateGameCode()
-    let existing = await ctx.db
-      .query("games")
-      .withIndex("by_code", (q) => q.eq("code", code))
-      .unique()
+    // Generate short code
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase()
 
-    while (existing) {
-      code = generateGameCode()
-      existing = await ctx.db
-        .query("games")
-        .withIndex("by_code", (q) => q.eq("code", code))
-        .unique()
-    }
-
-    // Create game
     const gameId = await ctx.db.insert("games", {
       hostClerkId: identity.subject,
       code,
       status: "lobby",
     })
 
-    // Add host as first player
-    const playerId = await ctx.db.insert("players", {
+    // Add host as player
+    await ctx.db.insert("players", {
       gameId,
-      name: identity.givenName,
-      email: identity.email,
       clerkId: identity.subject,
+      name: identity.name || "Host",
       isHost: true,
     })
 
-    return { gameId, playerId, code }
+    return { gameId }
   },
 })
 
-// Get game by code
 export const getGameByCode = query({
   args: { code: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db
-      .query("games")
-      .withIndex("by_code", (q) => q.eq("code", args.code.toUpperCase()))
-      .unique()
-  },
+    return await ctx.db.query("games").withIndex("by_code", q => q.eq("code", args.code)).first();
+  }
 })
 
-// Get game with all players and votes (real-time subscription)
 export const getGameWithDetails = query({
   args: { gameId: v.id("games") },
   handler: async (ctx, args) => {
@@ -75,19 +81,18 @@ export const getGameWithDetails = query({
 
     const players = await ctx.db
       .query("players")
-      .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+      .filter((q) => q.eq(q.field("gameId"), args.gameId))
       .collect()
 
     const votes = await ctx.db
       .query("votes")
-      .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+      .filter((q) => q.eq(q.field("gameId"), args.gameId))
       .collect()
 
     return { game, players, votes }
   },
 })
 
-// Join a game
 export const joinGame = mutation({
   args: {
     gameId: v.id("games"),
@@ -95,35 +100,62 @@ export const joinGame = mutation({
     guestEmail: v.optional(v.string()),
   },
   handler: async (ctx, args): Promise<{ success: true; playerId: string; } | { success: false; error: string }> => {
-    const game = await ctx.db.get(args.gameId)
+    const { gameId, guestName, guestEmail } = args
+    const game = await ctx.db.get(gameId)
+    if (!game) return { success: false, error: "Game not found" }
 
-    if (!game) {
-      throw new Error("Game not found")
-    }
+    if (game.status !== "lobby") return { success: false, error: "Game already started" }
 
-    if (game.status !== "lobby") {
-      return { success: false, error: "Game has already started" }
-    }
-
-    // Check if guest already joined
+    // Check duplicate name
     const existing = await ctx.db
       .query("players")
-      .withIndex("by_game_and_name", (q) => q.eq("gameId", args.gameId).eq("name", args.guestName))
-      .unique()
+      .filter(q => q.and(
+        q.eq(q.field("gameId"), gameId),
+        q.eq(q.field("name"), guestName)
+      ))
+      .first()
 
-    if (existing) {
-      // Return error for duplicate name
-      return { success: false, error: "Name already taken in this game" }
-    }
+    if (existing) return { success: false, error: "Name already taken" }
+
+    // Check auth
+    const identity = await ctx.auth.getUserIdentity()
 
     const playerId = await ctx.db.insert("players", {
-      gameId: args.gameId,
-      name: args.guestName,
-      email: args.guestEmail,
+      gameId,
+      name: guestName,
       isHost: false,
+      clerkId: identity?.subject, // Link if auth
+      email: guestEmail, // Store optional email
     })
 
     return { success: true, playerId }
+  },
+})
+
+// Start voting
+export const startGame = mutation({
+  args: {
+    gameId: v.id("games"),
+  },
+  handler: async (ctx, args) => {
+    // Validate host is making this call
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity || !identity.subject) {
+      throw new Error("Not authenticated")
+    }
+
+    const player = await ctx.db
+      .query("players")
+      .withIndex("by_game_and_clerk", (q) => q.eq("gameId", args.gameId).eq("clerkId", identity.subject))
+      .unique()
+
+    if (!player || !player.isHost) {
+      throw new Error("Only the host can start the game")
+    }
+
+    await ctx.db.patch(args.gameId, {
+      status: "voting",
+    })
   },
 })
 
@@ -149,6 +181,30 @@ export const submitVote = mutation({
         gameId: args.gameId,
         voterId: args.voterId,
         votedForId: args.votedForId,
+      })
+    }
+
+    // Check if all players have voted
+    const players = await ctx.db
+      .query("players")
+      .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+      .collect()
+
+    const votes = await ctx.db
+      .query("votes")
+      .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+      .collect()
+
+    // If everyone voted (number of votes equals number of players), move to pending
+    // Note: This logic assumes we got the latest vote included in the result or we count the just inserted/updated one.
+    // convex queries inside mutations see the writes from the same mutation? 
+    // Yes, they should see the writes if consistent read is used, but query within mutation is standard.
+    // Wait, `votes` query above might NOT see the just inserted vote if not using `db.get` specifically or if consistency is eventual.
+    // Actually, in Convex Mutation, reads ARE consistent with writes done in the same mutation.
+
+    if (votes.length >= players.length) {
+      await ctx.db.patch(args.gameId, {
+        status: "pending",
       })
     }
   },
