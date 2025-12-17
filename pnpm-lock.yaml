@@ -9,26 +9,26 @@ importers:
   .:
     dependencies:
       '@base-ui/react':
-        specifier: ^1.0.0
+        specifier: 1.0.0
         version: 1.0.0(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@clerk/nextjs':
-        specifier: ^6.36.3
+        specifier: 6.36.3
         version: 6.36.3(next@16.0.10(@babel/core@7.28.5)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@hugeicons/core-free-icons':
-        specifier: ^3.0.0
+        specifier: 3.0.0
         version: 3.0.0
       '@hugeicons/react':
-        specifier: ^1.1.2
+        specifier: 1.1.2
         version: 1.1.2(react@19.2.1)
       class-variance-authority:
-        specifier: ^0.7.1
+        specifier: 0.7.1
         version: 0.7.1
       clsx:
-        specifier: ^2.1.1
+        specifier: 2.1.1
         version: 2.1.1
       convex:
-        specifier: ^1.31.0
-        version: 1.31.0(@clerk/clerk-react@5.59.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react@19.2.1)
+        specifier: 1.31.1
+        version: 1.31.1(@clerk/clerk-react@5.59.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react@19.2.1)
       next:
         specifier: 16.0.10
         version: 16.0.10(@babel/core@7.28.5)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -39,38 +39,38 @@ importers:
         specifier: 19.2.1
         version: 19.2.1(react@19.2.1)
       shadcn:
-        specifier: ^3.6.1
+        specifier: 3.6.1
         version: 3.6.1(@types/node@20.19.27)(hono@4.11.1)(typescript@5.9.3)
       tailwind-merge:
-        specifier: ^3.4.0
+        specifier: 3.4.0
         version: 3.4.0
       tw-animate-css:
-        specifier: ^1.4.0
+        specifier: 1.4.0
         version: 1.4.0
     devDependencies:
       '@tailwindcss/postcss':
-        specifier: ^4
+        specifier: '4'
         version: 4.1.18
       '@types/node':
-        specifier: ^20
+        specifier: '20'
         version: 20.19.27
       '@types/react':
-        specifier: ^19
+        specifier: '19'
         version: 19.2.7
       '@types/react-dom':
-        specifier: ^19
+        specifier: '19'
         version: 19.2.3(@types/react@19.2.7)
       eslint:
-        specifier: ^9
+        specifier: '9'
         version: 9.39.2(jiti@2.6.1)
       eslint-config-next:
         specifier: 16.0.10
         version: 16.0.10(@typescript-eslint/parser@8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       tailwindcss:
-        specifier: ^4
+        specifier: '4'
         version: 4.1.18
       typescript:
-        specifier: ^5
+        specifier: '5'
         version: 5.9.3
 
 packages:
@@ -1344,8 +1344,8 @@ packages:
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
 
-  convex@1.31.0:
-    resolution: {integrity: sha512-ht3dtpWQmxX62T8PT3p/5PDlRzSW5p2IDTP4exKjQ5dqmvhtn1wLFakJAX4CCeu1s0Ch0dKY5g2dk/wETTRAOw==}
+  convex@1.31.1:
+    resolution: {integrity: sha512-VcElFD0q+BxxhYmoxoiOIsInmMrPMsGHpFSD1UYybRDJYvbNd69977ra6e3EXywUOF4qE0P4In9qCphr78QYCw==}
     engines: {node: '>=18.0.0', npm: '>=7.0.0'}
     hasBin: true
     peerDependencies:
@@ -4433,7 +4433,7 @@ snapshots:
 
   convert-source-map@2.0.0: {}
 
-  convex@1.31.0(@clerk/clerk-react@5.59.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react@19.2.1):
+  convex@1.31.1(@clerk/clerk-react@5.59.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react@19.2.1):
     dependencies:
       esbuild: 0.25.4
       prettier: 3.7.4
