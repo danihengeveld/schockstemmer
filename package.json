@@ -1,7 +1,31 @@
 {
   "name": "schockstemmer",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
+  "description": "The ultimate Schocken companion app. Track your games, vote on losers, and avoid buying the round.",
+  "author": {
+    "name": "Dani Hengeveld",
+    "url": "https://dani.hengeveld.dev"
+  },
+  "maintainers": [
+    {
+      "name": "danihengeveld",
+      "url": "https://github.com/danihengeveld"
+    }
+  ],
+  "keywords": [
+    "Schocken",
+    "Drinking Game",
+    "Companion App",
+    "SchockStemmer",
+    "Game Tracker",
+    "Schocken App"
+  ],
+  "homepage": "https://schockstemmer.hengeveld.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danihengeveld/schockstemmer.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
