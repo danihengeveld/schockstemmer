@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { shadcn } from '@clerk/themes'
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -83,7 +84,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider appearance={{ theme: shadcn }}>
       <html lang="en" suppressHydrationWarning>
         <body className={`${inter.variable} antialiased min-h-screen bg-background flex flex-col`}>
           <ConvexClientProvider>

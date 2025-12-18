@@ -14,6 +14,9 @@ importers:
       '@clerk/nextjs':
         specifier: 6.36.3
         version: 6.36.3(next@16.0.10(@babel/core@7.28.5)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@clerk/themes':
+        specifier: 2.4.44
+        version: 2.4.44(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@hugeicons/core-free-icons':
         specifier: 3.0.0
         version: 3.0.0
@@ -291,6 +294,10 @@ packages:
         optional: true
       react-dom:
         optional: true
+
+  '@clerk/themes@2.4.44':
+    resolution: {integrity: sha512-REJCMVHPYx4sLSgKCKh8dEb9TZ+PYpbZBYkpYKHJZxkY+qP4xaScHc0ykJdhslkftni5HOg+8vGws7cZu0kg0A==}
+    engines: {node: '>=18.17.0'}
 
   '@clerk/types@4.101.7':
     resolution: {integrity: sha512-1l1FUziIGozg8YRI1UOklR1PmS6HV7IJB3CAA10MOheZEJkQ2sEnjG8E/DObstIX7Zq/HB0OHViNt6c7nyTeRg==}
@@ -3570,6 +3577,14 @@ snapshots:
     optionalDependencies:
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
+
+  '@clerk/themes@2.4.44(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+    dependencies:
+      '@clerk/shared': 3.40.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - react
+      - react-dom
 
   '@clerk/types@4.101.7(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
