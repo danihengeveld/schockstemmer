@@ -148,7 +148,7 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave }
           </Button>
         )}
         <Button size="lg" variant="outline" onClick={onLeave} className="min-w-[200px] rounded-full shadow-sm hover:shadow-md transition-all">
-          Back to Home
+          Leave Game
         </Button>
       </div>
     </div>

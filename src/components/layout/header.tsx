@@ -3,16 +3,35 @@
 import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs"
-import { Share2 } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { toast } from "sonner"
+import { useMutation } from "convex/react"
+import { api } from "../../../convex/_generated/api"
+import { Id } from "../../../convex/_generated/dataModel"
+import { LogOut, Share2 } from "lucide-react"
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import Image from "next/image"
 
 export function Header() {
   const { isSignedIn, user } = useUser()
   const pathname = usePathname()
+  const router = useRouter()
   const isGamePage = pathname.startsWith('/game/')
+  const gameId = isGamePage ? pathname.split('/')[2] : null
+
+  const [playerId, setPlayerId] = useState<string | null>(null)
+
+  const leaveGame = useMutation(api.games.leaveGame)
+
+  useEffect(() => {
+    if (gameId) {
+      const stored = localStorage.getItem(`schock_game_${gameId}`)
+      setPlayerId(stored)
+    } else {
+      setPlayerId(null)
+    }
+  }, [gameId, pathname])
 
   const handleShare = async () => {
     const url = window.location.href
@@ -31,24 +50,49 @@ export function Header() {
     }
   }
 
+  const handleLeave = async () => {
+    if (!playerId) return
+    try {
+      await leaveGame({ playerId: playerId as Id<"players"> })
+      localStorage.removeItem(`schock_game_${gameId}`)
+      toast.success("Left the game")
+      router.push('/')
+    } catch (err) {
+      toast.error("Could not leave game")
+    }
+  }
+
   return (
     <header className="w-full border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 h-16 flex justify-between items-center w-full">
-        <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <Image src="/icon.png" alt="SchockStemmer Logo" width={180} height={180} className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 shadow-sm" />
-          <span className="font-bold text-2xl tracking-tighter">SchockStemmer</span>
+        <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity whitespace-nowrap overflow-hidden">
+          <Image src="/icon.png" alt="SchockStemmer Logo" width={180} height={180} className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/10 border border-primary/20 shadow-sm shrink-0" />
+          <span className="font-bold text-xl sm:text-2xl tracking-tighter hidden sm:block">SchockStemmer</span>
         </Link>
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-2 sm:gap-4 items-center shrink-0">
           {isGamePage && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-full gap-2 border-primary/20 hover:border-primary/50"
-              onClick={handleShare}
-            >
-              <Share2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Invite</span>
-            </Button>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full gap-2 border-primary/20 hover:border-primary/50 h-8 sm:h-9"
+                onClick={handleShare}
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Invite</span>
+              </Button>
+              {playerId && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-full gap-2 text-destructive hover:bg-destructive/10 h-8 sm:h-9"
+                  onClick={handleLeave}
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Leave</span>
+                </Button>
+              )}
+            </div>
           )}
           {isSignedIn && (
             <Link href="/history">

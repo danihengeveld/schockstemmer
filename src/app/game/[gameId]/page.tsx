@@ -27,6 +27,7 @@ export default function GamePage() {
 
   // Mutations
   const joinGame = useMutation(api.games.joinGame)
+  const leaveGame = useMutation(api.games.leaveGame)
 
   // Local state
   const [showJoinDialog, setShowJoinDialog] = useState(false)
@@ -98,6 +99,20 @@ export default function GamePage() {
     }
   }
 
+  const handleLeave = async () => {
+    const pId = currentPlayer?._id || localPlayerId
+    if (pId) {
+      try {
+        await leaveGame({ playerId: pId as Id<"players"> })
+        localStorage.removeItem(`schock_game_${gameId}`)
+      } catch (err) {
+        // Fallback for cleanup
+        localStorage.removeItem(`schock_game_${gameId}`)
+      }
+    }
+    router.push('/')
+  }
+
   // View Routing
   if (showJoinDialog) {
     return <JoinGameDialog gameCode={game?.code} onJoin={handleJoin} />
@@ -140,7 +155,7 @@ export default function GamePage() {
           votes={votes}
           loserId={activeRound.loserId!}
           isHost={isHost}
-          onLeave={() => router.push('/')}
+          onLeave={handleLeave}
         />
       )}
 
@@ -152,7 +167,7 @@ export default function GamePage() {
             players={players}
             votes={votes}
             loserId={activeRound?.loserId!}
-            onLeave={() => router.push('/')}
+            onLeave={handleLeave}
           />
         </div>
       )}
