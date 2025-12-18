@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎲 SchockStemmer
 
-## Getting Started
+The ultimate Schocken companion app. Track your games, vote on losers, and avoid buying the round.
 
-First, run the development server:
+## ✨ Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Live Game Lobby**: Quick join via 6-character short codes.
+- **Anonymous Voting**: All players vote on who they think will lose the round.
+- **Drinking Budgets**: Automatic penalty calculation for incorrect votes and self-votes.
+- **Session History**: Track your past games and losses.
+- **Real-time Sync**: Built on Convex for instant updates across all devices.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Framework**: [Next.js 16](https://nextjs.org) (App Router, React 19)
+- **Database & Backend**: [Convex](https://convex.dev)
+- **Authentication**: [Clerk](https://clerk.com)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com) & [Shadcn UI](https://ui.shadcn.com)
+- **Icons**: [Lucide React](https://lucide.dev)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🚀 Getting Started
 
-## Learn More
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/danihengeveld/schockstemmer.git
+   cd schockstemmer
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. **Install dependencies**:
+   ```bash
+   pnpm install
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. **Set up environment variables**:
+   Create a `.env.local` file and add your Clerk and Convex keys.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. **Run the development server**:
+   ```bash
+   npm run dev
+   ```
 
-## Deploy on Vercel
+Open [http://localhost:3000](http://localhost:3000) to start playing.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 👤 Author
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Dani Hengeveld**
+- Website: [dani.hengeveld.dev](https://dani.hengeveld.dev)
+- GitHub: [@danihengeveld](https://github.com/danihengeveld)
