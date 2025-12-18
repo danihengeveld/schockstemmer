@@ -1,3 +1,5 @@
+import { useMutation } from "convex/react"
+import { api } from "../../../convex/_generated/api"
 import { GameCard } from "@/components/game/game-card"
 import { Button } from "@/components/ui/button"
 import { Id } from "../../../convex/_generated/dataModel"
@@ -6,14 +8,20 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Loader2, Users } from "lucide-react"
 
 interface LobbyViewProps {
+  gameId: Id<"games">
   gameCode: string
   players: Doc<"players">[]
   isHost: boolean
-  onStartGame: () => void
   currentUserId: Id<"players"> | null
 }
 
-export function LobbyView({ gameCode, players, isHost, onStartGame, currentUserId }: LobbyViewProps) {
+export function LobbyView({ gameId, gameCode, players, isHost, currentUserId }: LobbyViewProps) {
+  const startGame = useMutation(api.games.startGame)
+
+  const handleStartGame = async () => {
+    await startGame({ gameId })
+  }
+
   const headerContent = (
     <div className="flex flex-col items-center gap-2">
       <span className="text-sm uppercase tracking-widest text-muted-foreground font-semibold">Join Code</span>
@@ -64,7 +72,7 @@ export function LobbyView({ gameCode, players, isHost, onStartGame, currentUserI
         <Button
           className="w-full h-12 text-lg font-bold rounded-full shadow-md hover:shadow-lg transition-all"
           size="lg"
-          onClick={onStartGame}
+          onClick={handleStartGame}
         >
           Start Voting Phase
         </Button>

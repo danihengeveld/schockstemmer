@@ -1,27 +1,41 @@
 "use client"
 
+import { useMutation } from "convex/react"
+import { api } from "../../../convex/_generated/api"
 import { GameCard } from "@/components/game/game-card"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Id } from "../../../convex/_generated/dataModel"
-import { Doc } from "../../../convex/_generated/dataModel"
+import { Id, Doc } from "../../../convex/_generated/dataModel"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Trophy, Skull, Beer } from "lucide-react"
 
 interface ResultsViewProps {
+  gameId: Id<"games">
   players: Doc<"players">[]
   votes: Doc<"votes">[]
   loserId: Id<"players">
+  isHost?: boolean
   onLeave: () => void
 }
 
-export function ResultsView({ players, votes, loserId, onLeave }: ResultsViewProps) {
+export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave }: ResultsViewProps) {
+  const startNextRound = useMutation(api.games.startNextRound)
+
+  const handleNextRound = async () => {
+    await startNextRound({ gameId })
+  }
+
   const loser = players.find(p => p._id === loserId)
+  const loserVote = votes.find(v => v.voterId === loserId)
+  const loserVotedForSelf = loserVote?.votedForId === loserId
+
+  // Calculate shots for the loser
+  const loserShots = loserVotedForSelf ? 2 : 1
 
   // Who voted for the loser? (Drinking Buddies)
   const drinkingBuddies = votes
-    .filter(v => v.votedForId === loserId)
+    .filter(v => v.votedForId === loserId && v.voterId !== loserId)
     .map(v => players.find(p => p._id === v.voterId))
     .filter((p): p is Doc<"players"> => !!p)
 
@@ -32,14 +46,13 @@ export function ResultsView({ players, votes, loserId, onLeave }: ResultsViewPro
     voteCounts.set(v.votedForId, count + 1)
   })
 
-  // Since Results view is more complex/wider, we override the max-w
   return (
     <div className="w-full max-w-2xl space-y-8 animate-in fade-in duration-700 py-8">
       <div className="text-center space-y-2">
         <div className="inline-flex items-center justify-center p-3 rounded-full bg-destructive/10 text-destructive mb-4 animate-bounce">
           <Skull className="w-8 h-8" />
         </div>
-        <h1 className="text-4xl font-black tracking-tight underline decoration-destructive/30 underline-offset-8">GAME OVER</h1>
+        <h1 className="text-4xl font-black tracking-tight underline decoration-destructive/30 underline-offset-8">ROUND OVER</h1>
         <p className="text-muted-foreground text-lg">The results are in...</p>
       </div>
 
@@ -56,7 +69,16 @@ export function ResultsView({ players, votes, loserId, onLeave }: ResultsViewPro
           </Avatar>
           <div className="text-center space-y-1">
             <h2 className="text-4xl font-black tracking-tight">{loser?.name}</h2>
-            <p className="text-destructive font-bold animate-pulse text-sm uppercase tracking-widest">Has to drink!</p>
+            <div className="flex flex-col items-center gap-1">
+              <p className="text-destructive font-bold animate-pulse text-sm uppercase tracking-widest">
+                Has to take {loserShots} {loserShots === 1 ? 'shot' : 'shots'}!
+              </p>
+              {loserVotedForSelf && (
+                <Badge variant="destructive" className="rounded-full text-[10px] uppercase font-black tracking-widest">
+                  Self-Vote Penalty x2
+                </Badge>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -69,7 +91,7 @@ export function ResultsView({ players, votes, loserId, onLeave }: ResultsViewPro
               Drinking Buddies
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              These people thought {loser?.name} was safe. They drink too!
+              These people thought {loser?.name} was safe. 1 shot each!
             </p>
           </CardHeader>
           <CardContent>
@@ -90,12 +112,22 @@ export function ResultsView({ players, votes, loserId, onLeave }: ResultsViewPro
           {players.map(player => {
             const vote = votes.find(v => v.voterId === player._id)
             const votedFor = players.find(p => p._id === vote?.votedForId)
+            const isLoser = player._id === loserId
+            const isDrinkingBuddy = vote?.votedForId === loserId && !isLoser
+            const shots = isLoser ? (loserVotedForSelf ? 2 : 1) : (isDrinkingBuddy ? 1 : 0)
 
             return (
               <div key={player._id} className="flex justify-between items-center p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border shadow-sm text-sm transition-all hover:scale-[1.01]">
-                <span className="font-bold">{player.name}</span>
-                <div className="flex items-center gap-2 text-muted-foreground font-medium">
-                  <span>voted for</span>
+                <div className="flex flex-col">
+                  <span className="font-bold">{player.name}</span>
+                  {shots > 0 && (
+                    <span className="text-[10px] text-destructive font-black uppercase tracking-tighter">
+                      Take {shots} {shots === 1 ? 'shot' : 'shots'}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground font-medium text-right">
+                  <span className="hidden sm:inline">voted for</span>
                   <span className="font-black text-foreground">{votedFor?.name || "Unknown"}</span>
                   {votedFor?._id === loserId ? (
                     <Badge variant="destructive" className="ml-2 rounded-full text-[10px] font-black tracking-widest uppercase">INCORRECT</Badge>
@@ -109,7 +141,12 @@ export function ResultsView({ players, votes, loserId, onLeave }: ResultsViewPro
         </div>
       </div>
 
-      <div className="flex justify-center pt-8 pb-12">
+      <div className="flex flex-col items-center gap-4 pt-8 pb-12">
+        {isHost && (
+          <Button size="lg" onClick={handleNextRound} className="min-w-[200px] rounded-full shadow-lg hover:shadow-xl transition-all font-black uppercase tracking-widest">
+            Next Round
+          </Button>
+        )}
         <Button size="lg" variant="outline" onClick={onLeave} className="min-w-[200px] rounded-full shadow-sm hover:shadow-md transition-all">
           Back to Home
         </Button>

@@ -36,11 +36,13 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <Header />
-              <main className="flex-1 w-full max-w-7xl mx-auto flex flex-col">
+              <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8">
                 {children}
               </main>
-              <footer className="p-4 text-center text-sm text-muted-foreground border-t mt-4">
-                © 2025 SchockStemmer. Made for fun.
+              <footer className="w-full border-t bg-muted/30">
+                <div className="max-w-5xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
+                  © 2025 SchockStemmer. Made for fun.
+                </div>
               </footer>
               <Toaster />
             </ThemeProvider>

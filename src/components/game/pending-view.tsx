@@ -1,10 +1,11 @@
 
 "use client"
 
+import { useMutation } from "convex/react"
+import { api } from "../../../convex/_generated/api"
 import { GameCard } from "@/components/game/game-card"
 import { Button } from "@/components/ui/button"
-import { Id } from "../../../convex/_generated/dataModel"
-import { Doc } from "../../../convex/_generated/dataModel"
+import { Id, Doc } from "../../../convex/_generated/dataModel"
 import {
   Select,
   SelectContent,
@@ -16,13 +17,23 @@ import { useState } from "react"
 import { Dices, AlertTriangle } from "lucide-react"
 
 interface PendingViewProps {
+  roundId: Id<"rounds">
   players: Doc<"players">[]
   isHost: boolean
-  onGameFinished: (loserId: Id<"players">) => void
 }
 
-export function PendingView({ players, isHost, onGameFinished }: PendingViewProps) {
+export function PendingView({ roundId, players, isHost }: PendingViewProps) {
+  const finishRound = useMutation(api.games.finishRound)
   const [selectedLoser, setSelectedLoser] = useState<Id<"players"> | null>(null)
+
+  const handleFinishRound = async () => {
+    if (selectedLoser) {
+      await finishRound({
+        roundId,
+        loserId: selectedLoser
+      })
+    }
+  }
 
   // Note: Select onChange returns string, so we need to cast or find.
   const handleValueChange = (val: string | null) => {
@@ -78,7 +89,7 @@ export function PendingView({ players, isHost, onGameFinished }: PendingViewProp
             className="w-full h-12 text-lg font-bold rounded-full shadow-md hover:shadow-lg transition-all"
             variant="destructive"
             disabled={!selectedLoser}
-            onClick={() => selectedLoser && onGameFinished(selectedLoser)}
+            onClick={handleFinishRound}
           >
             Confirm Loser
           </Button>

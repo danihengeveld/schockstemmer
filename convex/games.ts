@@ -18,30 +18,38 @@ export const getUserGames = query({
     // Fetch unique games
     const gameIds = [...new Set(playerRecords.map(p => p.gameId))];
 
-    const results = [];
-    for (const id of gameIds) {
+    const games = await Promise.all(gameIds.map(async (id) => {
       const game = await ctx.db.get(id);
-      if (game) {
-        const players = await ctx.db
-          .query("players")
-          .filter((q) => q.eq(q.field("gameId"), id))
-          .collect()
+      if (!game) return null;
 
-        let loserName = null;
-        if (game.loserId) {
-          const loser = await ctx.db.get(game.loserId);
-          loserName = loser?.name;
-        }
+      const players = await ctx.db
+        .query("players")
+        .filter((q) => q.eq(q.field("gameId"), id))
+        .collect()
 
-        results.push({
-          ...game,
-          playerCount: players.length,
-          loserName
-        });
+      const latestRound = await ctx.db
+        .query("rounds")
+        .withIndex("by_game", (q) => q.eq("gameId", id))
+        .order("desc")
+        .first();
+
+      let loserName = null;
+      if (latestRound?.loserId) {
+        const loser = await ctx.db.get(latestRound.loserId);
+        loserName = loser?.name;
       }
-    }
 
-    return results.sort((a, b) => (b.finishedAt || b._creationTime) - (a.finishedAt || a._creationTime));
+      return {
+        ...game,
+        playerCount: players.length,
+        loserName,
+        lastRoundNumber: latestRound?.roundNumber || 0
+      };
+    }));
+
+    return games
+      .filter((g): g is NonNullable<typeof g> => g !== null)
+      .sort((a, b) => (b.finishedAt || b._creationTime) - (a.finishedAt || a._creationTime));
   }
 })
 
@@ -100,12 +108,23 @@ export const getGameWithDetails = query({
       .filter((q) => q.eq(q.field("gameId"), args.gameId))
       .collect()
 
-    const votes = await ctx.db
-      .query("votes")
-      .filter((q) => q.eq(q.field("gameId"), args.gameId))
+    const ALL_rounds = await ctx.db
+      .query("rounds")
+      .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
       .collect()
 
-    return { game, players, votes }
+    const allVotes = await ctx.db
+      .query("votes")
+      .filter((q) => q.or(
+        ...ALL_rounds.map(r => q.eq(q.field("roundId"), r._id))
+      ))
+      .collect()
+
+    const activeRound = ALL_rounds.find(r => r.status !== "finished") || ALL_rounds.sort((a, b) => b.roundNumber - a.roundNumber)[0];
+
+    const currentVotes = activeRound ? allVotes.filter(v => v.roundId === activeRound._id) : [];
+
+    return { game, players, activeRound, votes: currentVotes, allVotes, rounds: ALL_rounds }
   },
 })
 
@@ -114,7 +133,7 @@ export const joinGame = mutation({
     gameId: v.id("games"),
     guestName: v.string()
   },
-  handler: async (ctx, args): Promise<{ success: true; playerId: string; } | { success: false; error: string }> => {
+  handler: async (ctx, args) => {
     const { gameId, guestName } = args
     const game = await ctx.db.get(gameId)
     if (!game) return { success: false, error: "Game not found" }
@@ -146,7 +165,7 @@ export const joinGame = mutation({
   },
 })
 
-// Start voting
+// Start the first round
 export const startGame = mutation({
   args: {
     gameId: v.id("games"),
@@ -167,16 +186,55 @@ export const startGame = mutation({
       throw new Error("Only the host can start the game")
     }
 
+    // Mark game as active
     await ctx.db.patch(args.gameId, {
+      status: "active",
+    })
+
+    // Create first round
+    await ctx.db.insert("rounds", {
+      gameId: args.gameId,
+      roundNumber: 1,
       status: "voting",
     })
   },
 })
 
+// Start next round
+export const startNextRound = mutation({
+  args: {
+    gameId: v.id("games"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity || !identity.subject) throw new Error("Not authenticated")
+
+    const player = await ctx.db
+      .query("players")
+      .withIndex("by_game_and_clerk", (q) => q.eq("gameId", args.gameId).eq("clerkId", identity.subject))
+      .unique()
+
+    if (!player || !player.isHost) throw new Error("Only the host can start the next round")
+
+    const rounds = await ctx.db
+      .query("rounds")
+      .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+      .collect()
+
+    const maxRound = rounds.sort((a, b) => b.roundNumber - a.roundNumber)[0]
+
+    await ctx.db.insert("rounds", {
+      gameId: args.gameId,
+      roundNumber: (maxRound?.roundNumber || 0) + 1,
+      status: "voting",
+    })
+  }
+})
+
 // Submit a vote
 export const submitVote = mutation({
   args: {
-    gameId: v.id("games"),
+    roundId: v.id("rounds"),
     voterId: v.id("players"),
     votedForId: v.id("players")
   },
@@ -184,7 +242,7 @@ export const submitVote = mutation({
     // Check if already voted
     const existing = await ctx.db
       .query("votes")
-      .withIndex("by_game_and_voter", (q) => q.eq("gameId", args.gameId).eq("voterId", args.voterId))
+      .withIndex("by_round_and_voter", (q) => q.eq("roundId", args.roundId).eq("voterId", args.voterId))
       .unique()
 
     if (existing) {
@@ -192,61 +250,56 @@ export const submitVote = mutation({
       await ctx.db.patch(existing._id, { votedForId: args.votedForId })
     } else {
       await ctx.db.insert("votes", {
-        gameId: args.gameId,
+        roundId: args.roundId,
         voterId: args.voterId,
         votedForId: args.votedForId,
       })
     }
 
-    // Check if all players have voted
+    // Check if all players in the game have voted for this round
+    const round = await ctx.db.get(args.roundId)
+    if (!round) return
+
     const players = await ctx.db
       .query("players")
-      .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+      .withIndex("by_game", (q) => q.eq("gameId", round.gameId))
       .collect()
 
     const votes = await ctx.db
       .query("votes")
-      .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+      .withIndex("by_round", (q) => q.eq("roundId", args.roundId))
       .collect()
 
-    // If everyone voted (number of votes equals number of players), move to pending
-    // Note: This logic assumes we got the latest vote included in the result or we count the just inserted/updated one.
-    // convex queries inside mutations see the writes from the same mutation? 
-    // Yes, they should see the writes if consistent read is used, but query within mutation is standard.
-    // Wait, `votes` query above might NOT see the just inserted vote if not using `db.get` specifically or if consistency is eventual.
-    // Actually, in Convex Mutation, reads ARE consistent with writes done in the same mutation.
-
     if (votes.length >= players.length) {
-      await ctx.db.patch(args.gameId, {
+      await ctx.db.patch(args.roundId, {
         status: "pending",
       })
     }
   },
 })
 
-// Finish game with loser
-export const finishGame = mutation({
+// Finish round with loser
+export const finishRound = mutation({
   args: {
-    gameId: v.id("games"),
+    roundId: v.id("rounds"),
     loserId: v.id("players"),
   },
   handler: async (ctx, args) => {
-    // Validate host is making this call
+    const round = await ctx.db.get(args.roundId)
+    if (!round) throw new Error("Round not found")
+
+    // Validate host
     const identity = await ctx.auth.getUserIdentity()
-    if (!identity || !identity.subject) {
-      throw new Error("Not authenticated")
-    }
+    if (!identity || !identity.subject) throw new Error("Not authenticated")
 
     const player = await ctx.db
       .query("players")
-      .withIndex("by_game_and_clerk", (q) => q.eq("gameId", args.gameId).eq("clerkId", identity.subject))
+      .withIndex("by_game_and_clerk", (q) => q.eq("gameId", round.gameId).eq("clerkId", identity.subject))
       .unique()
 
-    if (!player || !player.isHost) {
-      throw new Error("Only the host can finish the game")
-    }
+    if (!player || !player.isHost) throw new Error("Only the host can finish the round")
 
-    await ctx.db.patch(args.gameId, {
+    await ctx.db.patch(args.roundId, {
       status: "finished",
       loserId: args.loserId,
       finishedAt: Date.now(),
@@ -254,33 +307,57 @@ export const finishGame = mutation({
   },
 })
 
+// Finish entire game session
+export const finishGame = mutation({
+  args: {
+    gameId: v.id("games"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity || !identity.subject) throw new Error("Not authenticated")
+
+    const player = await ctx.db
+      .query("players")
+      .withIndex("by_game_and_clerk", (q) => q.eq("gameId", args.gameId).eq("clerkId", identity.subject))
+      .unique()
+
+    if (!player || !player.isHost) throw new Error("Only the host can finish the game")
+
+    await ctx.db.patch(args.gameId, {
+      status: "finished",
+      finishedAt: Date.now(),
+    })
+  }
+})
+
 // Leave game (remove player)
 export const leaveGame = mutation({
   args: {
     playerId: v.id("players"),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<void> => {
     const player = await ctx.db.get(args.playerId)
     if (!player) return
 
-    // Delete any votes by this player
-    const vote = await ctx.db
+    // Delete any votes by this player (across all rounds if necessary, but mostly active ones)
+    // For simplicity, we can find all votes by this player and delete them.
+    const votes = await ctx.db
       .query("votes")
-      .withIndex("by_game_and_voter", (q) => q.eq("gameId", player.gameId).eq("voterId", args.playerId))
-      .unique()
+      .filter(q => q.eq(q.field("voterId"), args.playerId))
+      .collect();
 
-    if (vote) {
-      await ctx.db.delete(vote._id)
+    for (const v of votes) {
+      await ctx.db.delete(v._id)
     }
 
-    // Delete votes for this player
+    // Also delete any votes FOR this player
     const votesFor = await ctx.db
       .query("votes")
-      .withIndex("by_game_and_voted_for", (q) => q.eq("gameId", player.gameId).eq("votedForId", args.playerId))
-      .collect()
+      .filter(q => q.eq(q.field("votedForId"), args.playerId))
+      .collect();
 
-    for (const vote of votesFor) {
-      await ctx.db.delete(vote._id)
+    for (const v of votesFor) {
+      await ctx.db.delete(v._id)
     }
 
     // Delete the player

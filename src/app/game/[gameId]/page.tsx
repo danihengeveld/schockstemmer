@@ -14,6 +14,7 @@ import { JoinGameDialog } from "@/components/game/join-game-dialog"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 import { GameCard } from "@/components/game/game-card"
+import { RoundHistory } from "@/components/game/round-history"
 
 export default function GamePage() {
   const params = useParams()
@@ -25,9 +26,6 @@ export default function GamePage() {
   const data = useQuery(api.games.getGameWithDetails, { gameId })
 
   // Mutations
-  const startGame = useMutation(api.games.startGame)
-  const submitVote = useMutation(api.games.submitVote)
-  const finishGame = useMutation(api.games.finishGame)
   const joinGame = useMutation(api.games.joinGame)
 
   // Local state
@@ -36,7 +34,9 @@ export default function GamePage() {
   // Derived state
   const game = data?.game
   const players = data?.players || []
+  const activeRound = data?.activeRound
   const votes = data?.votes || []
+  const rounds = data?.rounds || []
 
   const [localPlayerId, setLocalPlayerId] = useState<string | null>(null)
   const [hasCheckedStorage, setHasCheckedStorage] = useState(false)
@@ -84,36 +84,16 @@ export default function GamePage() {
   }
 
   // Handlers
-  const handleStartGame = async () => {
-    await startGame({ gameId })
-  }
-
-  const handleVote = async (votedForId: Id<"players">) => {
-    if (!currentPlayer) return
-    await submitVote({
-      gameId,
-      voterId: currentPlayer._id,
-      votedForId
-    })
-  }
-
-  const handleFinishGame = async (loserId: Id<"players">) => {
-    await finishGame({
-      gameId,
-      loserId
-    })
-  }
-
   const handleJoin = async (name: string) => {
     const result = await joinGame({
       gameId,
       guestName: name
     })
 
-    if (result.success) {
+    if (result.success && result.playerId) {
       localStorage.setItem(`schock_game_${gameId}`, result.playerId)
       setLocalPlayerId(result.playerId)
-    } else {
+    } else if (!result.success) {
       toast.error(result.error)
     }
   }
@@ -127,39 +107,58 @@ export default function GamePage() {
     <main className="min-h-screen bg-background p-4 flex flex-col items-center justify-center max-w-5xl mx-auto w-full">
       {game?.status === "lobby" && (
         <LobbyView
+          gameId={gameId}
           gameCode={game.code}
           players={players}
           isHost={isHost}
-          onStartGame={handleStartGame}
           currentUserId={currentPlayer?._id || null}
         />
       )}
 
-      {game?.status === "voting" && (
+      {game?.status === "active" && activeRound?.status === "voting" && currentPlayer && (
         <VotingView
+          roundId={activeRound._id}
+          voterId={currentPlayer._id}
           players={players}
           currentPlayer={currentPlayer}
-          onVote={handleVote}
           currentVote={votes.find(v => v.voterId === currentPlayer?._id)?.votedForId}
         />
       )}
 
-      {game?.status === "pending" && (
+      {game?.status === "active" && activeRound?.status === "pending" && (
         <PendingView
+          roundId={activeRound._id}
           players={players}
           isHost={isHost}
-          onGameFinished={handleFinishGame}
+        />
+      )}
+
+      {game?.status === "active" && activeRound?.status === "finished" && (
+        <ResultsView
+          gameId={gameId}
+          players={players}
+          votes={votes}
+          loserId={activeRound.loserId!}
+          isHost={isHost}
+          onLeave={() => router.push('/')}
         />
       )}
 
       {game?.status === "finished" && (
-        <ResultsView
-          players={players}
-          votes={votes}
-          loserId={game.loserId!}
-          onLeave={() => router.push('/')}
-        />
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-bold">Game Session Ended</h2>
+          <ResultsView
+            gameId={gameId}
+            players={players}
+            votes={votes}
+            loserId={activeRound?.loserId!}
+            onLeave={() => router.push('/')}
+          />
+        </div>
       )}
+
+      {/* Persistent History & Leaderboard */}
+      <RoundHistory rounds={rounds} players={players} allVotes={data?.allVotes || []} />
     </main>
   )
 }

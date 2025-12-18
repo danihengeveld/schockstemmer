@@ -1,25 +1,33 @@
 "use client"
 
+import { useMutation } from "convex/react"
+import { api } from "../../../convex/_generated/api"
 import { GameCard } from "@/components/game/game-card"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Id } from "../../../convex/_generated/dataModel"
+import { Id, Doc } from "../../../convex/_generated/dataModel"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 
 interface VotingViewProps {
-  players: any[]
-  currentPlayer: any
-  onVote: (votedForId: Id<"players">) => void
+  roundId: Id<"rounds">
+  voterId: Id<"players">
+  players: Doc<"players">[]
+  currentPlayer: Doc<"players"> | undefined | null
   currentVote: Id<"players"> | undefined
 }
 
-export function VotingView({ players, currentPlayer, onVote, currentVote }: VotingViewProps) {
+export function VotingView({ roundId, voterId, players, currentPlayer, currentVote }: VotingViewProps) {
+  const submitVote = useMutation(api.games.submitVote)
   const [selectedId, setSelectedId] = useState<Id<"players"> | undefined>(currentVote)
 
-  const handleVote = () => {
+  const handleVote = async () => {
     if (selectedId) {
-      onVote(selectedId)
+      await submitVote({
+        roundId,
+        voterId,
+        votedForId: selectedId
+      })
     }
   }
 
