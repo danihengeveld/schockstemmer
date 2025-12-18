@@ -11,7 +11,7 @@ import { Loader2, Users, Trophy, Calendar, ExternalLink, History as HistoryIcon 
 export default function HistoryPage() {
   const games = useQuery(api.games.getUserGames)
 
-  if (games === undefined) {
+  if (!games) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

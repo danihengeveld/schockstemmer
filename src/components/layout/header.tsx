@@ -1,11 +1,12 @@
 "use client"
 
+import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs"
-import Link from "next/link"
-import { ModeToggle } from "@/components/mode-toggle"
-import { usePathname } from "next/navigation"
 import { Share2 } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { toast } from "sonner"
 
 export function Header() {
@@ -34,9 +35,7 @@ export function Header() {
     <header className="w-full border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 h-16 flex justify-between items-center w-full">
         <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-sm overflow-hidden">
-            <img src="/logo.png" alt="SchockStemmer Logo" className="w-7 h-7 object-contain" />
-          </div>
+          <Image src="/icon.png" alt="SchockStemmer Logo" width={180} height={180} className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 shadow-sm" />
           <span className="font-bold text-2xl tracking-tighter">SchockStemmer</span>
         </Link>
         <div className="flex gap-4 items-center">
@@ -53,7 +52,7 @@ export function Header() {
           )}
           {isSignedIn && (
             <Link href="/history">
-              <Button variant="ghost" className="text-sm font-medium rounded-full">History</Button>
+              <Button variant="ghost" className="rounded-full">History</Button>
             </Link>
           )}
           {!isSignedIn && (
@@ -64,9 +63,9 @@ export function Header() {
           {isSignedIn && (
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium text-muted-foreground hidden sm:inline-block">
-                {user?.firstName || user?.fullName}
+                {user?.firstName}
               </span>
-              <UserButton afterSignOutUrl="/" />
+              <UserButton />
             </div>
           )}
           <ModeToggle />

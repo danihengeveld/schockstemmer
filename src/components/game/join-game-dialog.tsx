@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Field, FieldLabel, FieldError } from "@/components/ui/field" // Import primitives
 import { useState, useEffect } from "react"
 import { useUser } from "@clerk/nextjs"
-import { User, Mail } from "lucide-react"
+import { User } from "lucide-react"
 
 interface JoinGameProps {
   gameCode?: string
