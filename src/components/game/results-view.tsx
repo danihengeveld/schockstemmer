@@ -1,14 +1,24 @@
 "use client"
 
-import { useMutation } from "convex/react"
-import { api } from "../../../convex/_generated/api"
-import { GameCard } from "@/components/game/game-card"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Id, Doc } from "../../../convex/_generated/dataModel"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Trophy, Skull, Beer } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useMutation } from "convex/react"
+import { Beer, LogOut, Power, Skull } from "lucide-react"
+import { api } from "../../../convex/_generated/api"
+import { Doc, Id } from "../../../convex/_generated/dataModel"
 
 interface ResultsViewProps {
   gameId: Id<"games">
@@ -17,13 +27,19 @@ interface ResultsViewProps {
   loserId: Id<"players">
   isHost?: boolean
   onLeave: () => void
+  currentPlayerId: Id<"players">
 }
 
-export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave }: ResultsViewProps) {
+export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, currentPlayerId }: ResultsViewProps) {
   const startNextRound = useMutation(api.games.startNextRound)
+  const finishGame = useMutation(api.games.finishGame)
 
   const handleNextRound = async () => {
-    await startNextRound({ gameId })
+    await startNextRound({ gameId, playerId: currentPlayerId })
+  }
+
+  const handleFinishGame = async () => {
+    await finishGame({ gameId, playerId: currentPlayerId })
   }
 
   const loser = players.find(p => p._id === loserId)
@@ -97,7 +113,7 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave }
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {drinkingBuddies.map(buddy => (
-                <Badge key={buddy._id} variant="secondary" className="px-3 py-1 rounded-full text-sm font-bold bg-secondary/80">
+                <Badge key={buddy._id} variant="secondary" className="px-3 py-1 rounded-full">
                   {buddy.name}
                 </Badge>
               ))}
@@ -119,7 +135,7 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave }
             return (
               <div key={player._id} className="flex justify-between items-center p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border shadow-sm text-sm transition-all hover:scale-[1.01]">
                 <div className="flex flex-col">
-                  <span className="font-bold">{player.name}</span>
+                  <span className="font-bold">{player.name}{player.hasLeft && <span className="text-muted-foreground font-normal ml-1">(Left)</span>}</span>
                   {shots > 0 && (
                     <span className="text-[10px] text-destructive font-black uppercase tracking-tighter">
                       Take {shots} {shots === 1 ? 'shot' : 'shots'}
@@ -143,11 +159,42 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave }
 
       <div className="flex flex-col items-center gap-4 pt-8 pb-12">
         {isHost && (
-          <Button size="lg" onClick={handleNextRound} className="min-w-[200px] rounded-full shadow-lg hover:shadow-xl transition-all font-black uppercase tracking-widest">
-            Next Round
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+            <Button size="lg" onClick={handleNextRound} className="flex-1 sm:flex-none min-w-[200px] rounded-full shadow-lg hover:shadow-xl transition-all font-black uppercase tracking-widest">
+              Next Round
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger
+                render={
+                  <Button
+                    size="lg"
+                    variant="secondary"
+                    className="flex-1 sm:flex-none min-w-[200px] rounded-full shadow-md hover:shadow-lg transition-all font-black uppercase tracking-widest"
+                  >
+                    <Power className="w-4 h-4 mr-2" />
+                    End Session
+                  </Button>
+                }
+              />
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>End Game Session?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to end this session? This will finish the game for all players and prevent any further rounds.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleFinishGame} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    End Session
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         )}
         <Button size="lg" variant="outline" onClick={onLeave} className="min-w-[200px] rounded-full shadow-sm hover:shadow-md transition-all">
+          <LogOut className="w-4 h-4 mr-2" />
           Leave Game
         </Button>
       </div>

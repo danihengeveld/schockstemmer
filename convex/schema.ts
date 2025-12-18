@@ -16,6 +16,7 @@ export default defineSchema({
     clerkId: v.optional(v.string()), // null for guests, set for authenticated users
     name: v.string(),
     isHost: v.boolean(),
+    hasLeft: v.optional(v.boolean()),
   })
     .index("by_game", ["gameId"])
     .index("by_game_and_clerk", ["gameId", "clerkId"])

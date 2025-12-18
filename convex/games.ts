@@ -79,14 +79,14 @@ export const createGame = mutation({
     })
 
     // Add host as player
-    await ctx.db.insert("players", {
+    const playerId = await ctx.db.insert("players", {
       gameId,
       clerkId: identity.subject,
       name: identity.givenName,
       isHost: true,
     })
 
-    return { gameId }
+    return { gameId, playerId }
   },
 })
 
@@ -143,15 +143,25 @@ export const joinGame = mutation({
     // Check duplicate name
     const existing = await ctx.db
       .query("players")
-      .filter(q => q.and(
-        q.eq(q.field("gameId"), gameId),
-        q.eq(q.field("name"), guestName)
-      ))
+      .withIndex("by_game_and_name", (q) => q.eq("gameId", gameId).eq("name", guestName))
       .first()
 
-    if (existing) return { success: false, error: "Name already taken" }
+    if (existing) {
+      if (!existing.hasLeft) {
+        return { success: false, error: "Name already taken" }
+      }
 
-    // Check auth
+      // Reactivate existing player who left
+      const identity = await ctx.auth.getUserIdentity()
+      await ctx.db.patch(existing._id, {
+        hasLeft: false,
+        clerkId: identity?.subject || existing.clerkId, // Update or keep existing clerkId
+      })
+
+      return { success: true, playerId: existing._id }
+    }
+
+    // Check auth for new player
     const identity = await ctx.auth.getUserIdentity()
 
     const playerId = await ctx.db.insert("players", {
@@ -169,21 +179,19 @@ export const joinGame = mutation({
 export const startGame = mutation({
   args: {
     gameId: v.id("games"),
+    playerId: v.id("players"),
   },
   handler: async (ctx, args) => {
-    // Validate host is making this call
-    const identity = await ctx.auth.getUserIdentity()
-    if (!identity || !identity.subject) {
-      throw new Error("Not authenticated")
+    const player = await ctx.db.get(args.playerId)
+
+    if (!player || player.gameId !== args.gameId || !player.isHost) {
+      throw new Error("Only the host can start the game")
     }
 
-    const player = await ctx.db
-      .query("players")
-      .withIndex("by_game_and_clerk", (q) => q.eq("gameId", args.gameId).eq("clerkId", identity.subject))
-      .unique()
-
-    if (!player || !player.isHost) {
-      throw new Error("Only the host can start the game")
+    // Double check auth if they are supposed to be authenticated
+    const identity = await ctx.auth.getUserIdentity()
+    if (player.clerkId && (!identity || identity.subject !== player.clerkId)) {
+      throw new Error("Unauthorized host action")
     }
 
     // Mark game as active
@@ -204,17 +212,20 @@ export const startGame = mutation({
 export const startNextRound = mutation({
   args: {
     gameId: v.id("games"),
+    playerId: v.id("players"),
   },
   handler: async (ctx, args) => {
+    const player = await ctx.db.get(args.playerId)
+
+    if (!player || player.gameId !== args.gameId || !player.isHost) {
+      throw new Error("Only the host can start the next round")
+    }
+
+    // Double check auth if they are supposed to be authenticated
     const identity = await ctx.auth.getUserIdentity()
-    if (!identity || !identity.subject) throw new Error("Not authenticated")
-
-    const player = await ctx.db
-      .query("players")
-      .withIndex("by_game_and_clerk", (q) => q.eq("gameId", args.gameId).eq("clerkId", identity.subject))
-      .unique()
-
-    if (!player || !player.isHost) throw new Error("Only the host can start the next round")
+    if (player.clerkId && (!identity || identity.subject !== player.clerkId)) {
+      throw new Error("Unauthorized host action")
+    }
 
     const rounds = await ctx.db
       .query("rounds")
@@ -258,11 +269,12 @@ export const submitVote = mutation({
 
     // Check if all players in the game have voted for this round
     const round = await ctx.db.get(args.roundId)
-    if (!round) return
+    if (!round) throw new Error("Round not found")
 
     const players = await ctx.db
       .query("players")
       .withIndex("by_game", (q) => q.eq("gameId", round.gameId))
+      .filter((q) => q.neq(q.field("hasLeft"), true)) // Exclude players who have left
       .collect()
 
     const votes = await ctx.db
@@ -282,22 +294,23 @@ export const submitVote = mutation({
 export const finishRound = mutation({
   args: {
     roundId: v.id("rounds"),
+    playerId: v.id("players"),
     loserId: v.id("players"),
   },
   handler: async (ctx, args) => {
     const round = await ctx.db.get(args.roundId)
     if (!round) throw new Error("Round not found")
 
-    // Validate host
+    const player = await ctx.db.get(args.playerId)
+    if (!player || player.gameId !== round.gameId || !player.isHost) {
+      throw new Error("Only the host can finish the round")
+    }
+
+    // Double check auth if they are supposed to be authenticated
     const identity = await ctx.auth.getUserIdentity()
-    if (!identity || !identity.subject) throw new Error("Not authenticated")
-
-    const player = await ctx.db
-      .query("players")
-      .withIndex("by_game_and_clerk", (q) => q.eq("gameId", round.gameId).eq("clerkId", identity.subject))
-      .unique()
-
-    if (!player || !player.isHost) throw new Error("Only the host can finish the round")
+    if (player.clerkId && (!identity || identity.subject !== player.clerkId)) {
+      throw new Error("Unauthorized host action")
+    }
 
     await ctx.db.patch(args.roundId, {
       status: "finished",
@@ -311,17 +324,20 @@ export const finishRound = mutation({
 export const finishGame = mutation({
   args: {
     gameId: v.id("games"),
+    playerId: v.id("players"),
   },
   handler: async (ctx, args) => {
+    const player = await ctx.db.get(args.playerId)
+
+    if (!player || player.gameId !== args.gameId || !player.isHost) {
+      throw new Error("Only the host can finish the game")
+    }
+
+    // Double check auth if they are supposed to be authenticated
     const identity = await ctx.auth.getUserIdentity()
-    if (!identity || !identity.subject) throw new Error("Not authenticated")
-
-    const player = await ctx.db
-      .query("players")
-      .withIndex("by_game_and_clerk", (q) => q.eq("gameId", args.gameId).eq("clerkId", identity.subject))
-      .unique()
-
-    if (!player || !player.isHost) throw new Error("Only the host can finish the game")
+    if (player.clerkId && (!identity || identity.subject !== player.clerkId)) {
+      throw new Error("Unauthorized host action")
+    }
 
     await ctx.db.patch(args.gameId, {
       status: "finished",
@@ -339,28 +355,35 @@ export const leaveGame = mutation({
     const player = await ctx.db.get(args.playerId)
     if (!player) return
 
-    // Delete any votes by this player (across all rounds if necessary, but mostly active ones)
-    // For simplicity, we can find all votes by this player and delete them.
-    const votes = await ctx.db
-      .query("votes")
-      .filter(q => q.eq(q.field("voterId"), args.playerId))
-      .collect();
+    const gameId = player.gameId;
 
-    for (const v of votes) {
-      await ctx.db.delete(v._id)
+    // If host is leaving, transfer host status
+    if (player.isHost) {
+      const activePlayers = await ctx.db
+        .query("players")
+        .withIndex("by_game", (q) => q.eq("gameId", gameId))
+        .filter((q) => q.neq(q.field("hasLeft"), true))
+        .collect();
+
+      const newHost = activePlayers.find((p) => p._id !== args.playerId);
+      if (newHost) {
+        await ctx.db.patch(newHost._id, { isHost: true });
+
+        // Update games.hostClerkId if new host is authenticated
+        if (newHost.clerkId) {
+          await ctx.db.patch(gameId, { hostClerkId: newHost.clerkId });
+        }
+      } else {
+        // No players left, mark game as finished
+        await ctx.db.patch(gameId, { status: "finished", finishedAt: Date.now() });
+      }
     }
 
-    // Also delete any votes FOR this player
-    const votesFor = await ctx.db
-      .query("votes")
-      .filter(q => q.eq(q.field("votedForId"), args.playerId))
-      .collect();
-
-    for (const v of votesFor) {
-      await ctx.db.delete(v._id)
-    }
-
-    // Delete the player
-    await ctx.db.delete(args.playerId)
+    // Instead of deleting the player or their votes, we mark them as having left
+    // This preserves historical data while excluding them from future rounds
+    await ctx.db.patch(args.playerId, {
+      hasLeft: true,
+      isHost: false // Ensure they are no longer host
+    });
   },
 })

@@ -19,18 +19,21 @@ import { Dices, AlertTriangle } from "lucide-react"
 interface PendingViewProps {
   roundId: Id<"rounds">
   players: Doc<"players">[]
-  isHost: boolean
+  isHost: boolean,
+  currentPlayerId: Id<"players"> | null
 }
 
-export function PendingView({ roundId, players, isHost }: PendingViewProps) {
+export function PendingView({ roundId, players, isHost, currentPlayerId: currentUserId }: PendingViewProps) {
   const finishRound = useMutation(api.games.finishRound)
   const [selectedLoser, setSelectedLoser] = useState<Id<"players"> | null>(null)
 
   const handleFinishRound = async () => {
+    if (!currentUserId) return
     if (selectedLoser) {
       await finishRound({
         roundId,
-        loserId: selectedLoser
+        loserId: selectedLoser,
+        playerId: currentUserId
       })
     }
   }

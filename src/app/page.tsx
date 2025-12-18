@@ -13,7 +13,7 @@ import { Key } from "lucide-react"
 
 export default function Home() {
   const router = useRouter()
-  const { user, isSignedIn } = useUser()
+  const { isSignedIn } = useUser()
   const createGame = useMutation(api.games.createGame)
   const [joinCode, setJoinCode] = useState("")
   const [isCreating, setIsCreating] = useState(false)
@@ -21,7 +21,8 @@ export default function Home() {
   const handleCreateGame = async () => {
     try {
       setIsCreating(true)
-      const { gameId } = await createGame({})
+      const { gameId, playerId } = await createGame({})
+      localStorage.setItem(`schock_game_${gameId}`, playerId)
       router.push(`/game/${gameId}`)
     } catch (error) {
       console.error("Failed to create game:", error)

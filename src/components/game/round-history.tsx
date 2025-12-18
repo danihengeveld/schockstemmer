@@ -69,7 +69,7 @@ export function RoundHistory({ rounds, players, allVotes }: RoundHistoryProps) {
               >
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-black w-4 text-muted-foreground">#{index + 1}</span>
-                  <span className="font-bold">{player.name}</span>
+                  <span className="font-bold">{player.name}{player.hasLeft && <span className="text-muted-foreground font-normal ml-2 text-[10px]">(Left)</span>}</span>
                   {index === 0 && player.totalShots > 0 && <Badge variant="destructive" className="rounded-full h-4 text-[8px] px-1.5 font-black uppercase tracking-tighter">Current Loser</Badge>}
                 </div>
                 <div className="flex items-center gap-1.5">

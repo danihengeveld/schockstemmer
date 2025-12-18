@@ -14,15 +14,15 @@ interface LobbyViewProps {
   gameCode: string
   players: Doc<"players">[]
   isHost: boolean
-  currentUserId: Id<"players"> | null
+  currentPlayerId: Id<"players">
 }
 
-export function LobbyView({ gameId, gameCode, players, isHost, currentUserId }: LobbyViewProps) {
+export function LobbyView({ gameId, gameCode, players, isHost, currentPlayerId }: LobbyViewProps) {
   const startGame = useMutation(api.games.startGame)
   const [copied, setCopied] = useState(false)
 
   const handleStartGame = async () => {
-    await startGame({ gameId })
+    await startGame({ gameId, playerId: currentPlayerId })
   }
 
   const handleShare = async () => {
@@ -75,7 +75,7 @@ export function LobbyView({ gameId, gameCode, players, isHost, currentUserId }: 
           {players.length} Players Joined
         </div>
         <div className="grid grid-cols-1 gap-2">
-          {players.map((player) => (
+          {players.filter(p => !p.hasLeft).map((player) => (
             <div
               key={player._id}
               className="flex items-center gap-3 p-3 rounded-xl bg-background/50 border shadow-sm transition-all hover:scale-[1.02]"
@@ -89,7 +89,7 @@ export function LobbyView({ gameId, gameCode, players, isHost, currentUserId }: 
                 <span className="font-semibold">{player.name}</span>
                 {player.isHost && <span className="text-[10px] uppercase font-bold text-primary tracking-wide">Host</span>}
               </div>
-              {player._id === currentUserId && (
+              {player._id === currentPlayerId && (
                 <span className="ml-auto text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">You</span>
               )}
             </div>

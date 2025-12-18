@@ -1,20 +1,20 @@
 "use client"
 
-import { useQuery, useMutation } from "convex/react"
-import { api } from "../../../../convex/_generated/api"
-import { Id } from "../../../../convex/_generated/dataModel"
+import { GameCard } from "@/components/game/game-card"
+import { JoinGameDialog } from "@/components/game/join-game-dialog"
 import { LobbyView } from "@/components/game/lobby-view"
-import { VotingView } from "@/components/game/voting-view"
 import { PendingView } from "@/components/game/pending-view"
 import { ResultsView } from "@/components/game/results-view"
-import { useUser } from "@clerk/nextjs"
-import { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
-import { JoinGameDialog } from "@/components/game/join-game-dialog"
-import { toast } from "sonner"
-import { Skeleton } from "@/components/ui/skeleton"
-import { GameCard } from "@/components/game/game-card"
 import { RoundHistory } from "@/components/game/round-history"
+import { VotingView } from "@/components/game/voting-view"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useUser } from "@clerk/nextjs"
+import { useMutation, useQuery } from "convex/react"
+import { useParams, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
+import { api } from "../../../../convex/_generated/api"
+import { Id } from "../../../../convex/_generated/dataModel"
 
 export default function GamePage() {
   const params = useParams()
@@ -49,9 +49,14 @@ export default function GamePage() {
   }, [gameId])
 
   const currentPlayer = players.find(p =>
-    (user && p.clerkId === user.id) ||
-    (localPlayerId && p._id === localPlayerId)
+    ((user && p.clerkId === user.id) ||
+      (localPlayerId && p._id === localPlayerId)) &&
+    !p.hasLeft
   )
+
+  if (currentPlayer) {
+    localStorage.setItem(`schock_game_${gameId}`, currentPlayer._id)
+  }
 
   const isHost = currentPlayer?.isHost ?? false
 
@@ -100,10 +105,10 @@ export default function GamePage() {
   }
 
   const handleLeave = async () => {
-    const pId = currentPlayer?._id || localPlayerId
-    if (pId) {
+    const playerId = currentPlayer?._id || localPlayerId
+    if (playerId) {
       try {
-        await leaveGame({ playerId: pId as Id<"players"> })
+        await leaveGame({ playerId: playerId as Id<"players"> })
         localStorage.removeItem(`schock_game_${gameId}`)
       } catch (err) {
         // Fallback for cleanup
@@ -120,13 +125,13 @@ export default function GamePage() {
 
   return (
     <main className="min-h-screen bg-background p-4 flex flex-col items-center justify-center max-w-5xl mx-auto w-full">
-      {game?.status === "lobby" && (
+      {game?.status === "lobby" && currentPlayer && (
         <LobbyView
           gameId={gameId}
           gameCode={game.code}
           players={players}
           isHost={isHost}
-          currentUserId={currentPlayer?._id || null}
+          currentPlayerId={currentPlayer._id}
         />
       )}
 
@@ -135,20 +140,21 @@ export default function GamePage() {
           roundId={activeRound._id}
           voterId={currentPlayer._id}
           players={players}
-          currentPlayer={currentPlayer}
+          currentPlayerId={currentPlayer._id}
           currentVote={votes.find(v => v.voterId === currentPlayer?._id)?.votedForId}
         />
       )}
 
-      {game?.status === "active" && activeRound?.status === "pending" && (
+      {game?.status === "active" && activeRound?.status === "pending" && currentPlayer && (
         <PendingView
           roundId={activeRound._id}
           players={players}
           isHost={isHost}
+          currentPlayerId={currentPlayer._id}
         />
       )}
 
-      {game?.status === "active" && activeRound?.status === "finished" && (
+      {game?.status === "active" && activeRound?.status === "finished" && currentPlayer && (
         <ResultsView
           gameId={gameId}
           players={players}
@@ -156,11 +162,12 @@ export default function GamePage() {
           loserId={activeRound.loserId!}
           isHost={isHost}
           onLeave={handleLeave}
+          currentPlayerId={currentPlayer._id}
         />
       )}
 
-      {game?.status === "finished" && (
-        <div className="text-center space-y-4">
+      {game?.status === "finished" && currentPlayer && (
+        <div className="flex flex-col items-center justify-center text-center space-y-4 w-full">
           <h2 className="text-2xl font-bold">Game Session Ended</h2>
           <ResultsView
             gameId={gameId}
@@ -168,6 +175,7 @@ export default function GamePage() {
             votes={votes}
             loserId={activeRound?.loserId!}
             onLeave={handleLeave}
+            currentPlayerId={currentPlayer._id}
           />
         </div>
       )}

@@ -13,11 +13,11 @@ interface VotingViewProps {
   roundId: Id<"rounds">
   voterId: Id<"players">
   players: Doc<"players">[]
-  currentPlayer: Doc<"players"> | undefined | null
+  currentPlayerId: Id<"players">
   currentVote: Id<"players"> | undefined
 }
 
-export function VotingView({ roundId, voterId, players, currentPlayer, currentVote }: VotingViewProps) {
+export function VotingView({ roundId, voterId, players, currentPlayerId, currentVote }: VotingViewProps) {
   const submitVote = useMutation(api.games.submitVote)
   const [selectedId, setSelectedId] = useState<Id<"players"> | undefined>(currentVote)
 
@@ -41,7 +41,7 @@ export function VotingView({ roundId, voterId, players, currentPlayer, currentVo
   return (
     <GameCard headerContent={headerContent}>
       <div className="grid gap-3">
-        {players.map((player) => (
+        {players.filter(p => !p.hasLeft).map((player) => (
           <Card
             key={player._id}
             className={`cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] rounded-xl bg-background/50 backdrop-blur-sm ${selectedId === player._id ? "border-primary ring-2 ring-primary/20 shadow-md" : "border-border"
@@ -50,7 +50,7 @@ export function VotingView({ roundId, voterId, players, currentPlayer, currentVo
           >
             <CardContent className="p-4 flex items-center justify-between">
               <span className="text-lg font-medium">{player.name}</span>
-              {player._id === currentPlayer?._id && <Badge variant="secondary" className="rounded-full">YOU</Badge>}
+              {player._id === currentPlayerId && <Badge variant="secondary" className="rounded-full">YOU</Badge>}
             </CardContent>
           </Card>
         ))}
