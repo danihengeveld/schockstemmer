@@ -28,9 +28,10 @@ interface ResultsViewProps {
   isHost?: boolean
   onLeave: () => void
   currentPlayerId: Id<"players">
+  gameStatus?: string
 }
 
-export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, currentPlayerId }: ResultsViewProps) {
+export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, currentPlayerId, gameStatus }: ResultsViewProps) {
   const startNextRound = useMutation(api.games.startNextRound)
   const finishGame = useMutation(api.games.finishGame)
 
@@ -193,10 +194,12 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, 
             </AlertDialog>
           </div>
         )}
-        <Button size="lg" variant="outline" onClick={onLeave} className="min-w-[200px] rounded-full shadow-sm hover:shadow-md transition-all">
-          <LogOut className="w-4 h-4 mr-2" />
-          Leave Game
-        </Button>
+        {gameStatus !== "finished" && (
+          <Button size="lg" variant="outline" onClick={onLeave} className="min-w-[200px] rounded-full shadow-sm hover:shadow-md transition-all">
+            <LogOut className="w-4 h-4 mr-2" />
+            <span>Leave Game</span>
+          </Button>
+        )}
       </div>
     </div>
   )

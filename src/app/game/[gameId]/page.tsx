@@ -34,6 +34,7 @@ export default function GamePage() {
 
   // Derived state
   const game = data?.game
+  const gameStatus = game?.status
   const players = data?.players || []
   const activeRound = data?.activeRound
   const votes = data?.votes || []
@@ -154,7 +155,7 @@ export default function GamePage() {
         />
       )}
 
-      {game?.status === "active" && activeRound?.status === "finished" && currentPlayer && (
+      {gameStatus === "active" && activeRound?.status === "finished" && currentPlayer && (
         <ResultsView
           gameId={gameId}
           players={players}
@@ -163,10 +164,11 @@ export default function GamePage() {
           isHost={isHost}
           onLeave={handleLeave}
           currentPlayerId={currentPlayer._id}
+          gameStatus={gameStatus}
         />
       )}
 
-      {game?.status === "finished" && currentPlayer && (
+      {gameStatus === "finished" && currentPlayer && (
         <div className="flex flex-col items-center justify-center text-center space-y-4 w-full">
           <h2 className="text-2xl font-bold">Game Session Ended</h2>
           <ResultsView
@@ -176,6 +178,7 @@ export default function GamePage() {
             loserId={activeRound?.loserId!}
             onLeave={handleLeave}
             currentPlayerId={currentPlayer._id}
+            gameStatus={gameStatus}
           />
         </div>
       )}

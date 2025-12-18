@@ -3,35 +3,16 @@
 import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs"
-import { useRouter, usePathname } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { toast } from "sonner"
-import { useMutation } from "convex/react"
-import { api } from "../../../convex/_generated/api"
-import { Id } from "../../../convex/_generated/dataModel"
-import { LogOut, Share2 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { Share2 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
 export function Header() {
   const { isSignedIn, user } = useUser()
   const pathname = usePathname()
-  const router = useRouter()
   const isGamePage = pathname.startsWith('/game/')
-  const gameId = isGamePage ? pathname.split('/')[2] : null
-
-  const [playerId, setPlayerId] = useState<string | null>(null)
-
-  const leaveGame = useMutation(api.games.leaveGame)
-
-  useEffect(() => {
-    if (gameId) {
-      const stored = localStorage.getItem(`schock_game_${gameId}`)
-      setPlayerId(stored)
-    } else {
-      setPlayerId(null)
-    }
-  }, [gameId, pathname])
 
   const handleShare = async () => {
     const url = window.location.href
@@ -47,18 +28,6 @@ export function Header() {
       }
     } catch (err) {
       // Ignore abort errors
-    }
-  }
-
-  const handleLeave = async () => {
-    if (!playerId) return
-    try {
-      await leaveGame({ playerId: playerId as Id<"players"> })
-      localStorage.removeItem(`schock_game_${gameId}`)
-      toast.success("Left the game")
-      router.push('/')
-    } catch (err) {
-      toast.error("Could not leave game")
     }
   }
 
@@ -81,17 +50,6 @@ export function Header() {
                 <Share2 className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Invite</span>
               </Button>
-              {playerId && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-full gap-2 text-destructive hover:bg-destructive/10 h-8 sm:h-9"
-                  onClick={handleLeave}
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Leave</span>
-                </Button>
-              )}
             </div>
           )}
           {isSignedIn && (
