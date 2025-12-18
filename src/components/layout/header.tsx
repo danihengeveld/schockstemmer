@@ -33,8 +33,11 @@ export function Header() {
   return (
     <header className="w-full border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 h-16 flex justify-between items-center w-full">
-        <Link href="/" className="flex items-center gap-2 font-bold text-2xl hover:opacity-80 transition-opacity">
-          🍺 SchockStemmer
+        <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-sm overflow-hidden">
+            <img src="/logo.png" alt="SchockStemmer Logo" className="w-7 h-7 object-contain" />
+          </div>
+          <span className="font-bold text-2xl tracking-tighter">SchockStemmer</span>
         </Link>
         <div className="flex gap-4 items-center">
           {isGamePage && (
