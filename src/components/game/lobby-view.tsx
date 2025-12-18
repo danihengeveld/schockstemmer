@@ -4,8 +4,10 @@ import { GameCard } from "@/components/game/game-card"
 import { Button } from "@/components/ui/button"
 import { Id } from "../../../convex/_generated/dataModel"
 import { Doc } from "../../../convex/_generated/dataModel"
+import { toast } from "sonner"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Loader2, Users } from "lucide-react"
+import { Loader2, Users, Share2, Check } from "lucide-react"
+import { useState } from "react"
 
 interface LobbyViewProps {
   gameId: Id<"games">
@@ -17,9 +19,36 @@ interface LobbyViewProps {
 
 export function LobbyView({ gameId, gameCode, players, isHost, currentUserId }: LobbyViewProps) {
   const startGame = useMutation(api.games.startGame)
+  const [copied, setCopied] = useState(false)
 
   const handleStartGame = async () => {
     await startGame({ gameId })
+  }
+
+  const handleShare = async () => {
+    const url = window.location.href
+    const title = "Join my SchockStemmer game!"
+    const text = `Join my SchockStemmer game with code: ${gameCode}`
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text, url })
+        toast.success("Shared successfully!")
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          toast.error("Could not share")
+        }
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(url)
+        setCopied(true)
+        toast.success("Link copied to clipboard!")
+        setTimeout(() => setCopied(false), 2000)
+      } catch (err) {
+        toast.error("Could not copy link")
+      }
+    }
   }
 
   const headerContent = (
@@ -68,19 +97,34 @@ export function LobbyView({ gameId, gameCode, players, isHost, currentUserId }: 
         </div>
       </div>
 
-      {isHost ? (
+      <div className="flex flex-col gap-2">
+        {isHost ? (
+          <Button
+            className="w-full h-12 text-lg font-bold rounded-full shadow-md hover:shadow-lg transition-all"
+            size="lg"
+            onClick={handleStartGame}
+          >
+            Start Voting Phase
+          </Button>
+        ) : (
+          <div className="text-center p-4 rounded-xl bg-secondary/50 text-muted-foreground text-sm animate-pulse">
+            Waiting for host to start...
+          </div>
+        )}
+
         <Button
-          className="w-full h-12 text-lg font-bold rounded-full shadow-md hover:shadow-lg transition-all"
-          size="lg"
-          onClick={handleStartGame}
+          variant="outline"
+          className="w-full h-10 rounded-full border-dashed"
+          onClick={handleShare}
         >
-          Start Voting Phase
+          {copied ? (
+            <Check className="w-4 h-4 mr-2 text-green-500" />
+          ) : (
+            <Share2 className="w-4 h-4 mr-2" />
+          )}
+          {copied ? "Copied!" : "Invite Friends"}
         </Button>
-      ) : (
-        <div className="text-center p-4 rounded-xl bg-secondary/50 text-muted-foreground text-sm animate-pulse">
-          Waiting for host to start...
-        </div>
-      )}
+      </div>
     </GameCard>
   )
 }
