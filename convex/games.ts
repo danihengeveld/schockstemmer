@@ -1,6 +1,49 @@
 import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
-import { Doc } from "./_generated/dataModel"
+
+// Create a new game
+export const getUserGames = query({
+  args: {},
+  handler: async (ctx, _) => {
+    const identity = await ctx.auth.getUserIdentity()
+
+    if (!identity || !identity.subject) {
+      throw new Error("Not authenticated")
+    }
+
+    const playerRecords = await ctx.db.query("players").filter(q => q.eq(q.field("clerkId"), identity.subject)).collect();
+
+    if (playerRecords.length === 0) return [];
+
+    // Fetch unique games
+    const gameIds = [...new Set(playerRecords.map(p => p.gameId))];
+
+    const results = [];
+    for (const id of gameIds) {
+      const game = await ctx.db.get(id);
+      if (game) {
+        const players = await ctx.db
+          .query("players")
+          .filter((q) => q.eq(q.field("gameId"), id))
+          .collect()
+
+        let loserName = null;
+        if (game.loserId) {
+          const loser = await ctx.db.get(game.loserId);
+          loserName = loser?.name;
+        }
+
+        results.push({
+          ...game,
+          playerCount: players.length,
+          loserName
+        });
+      }
+    }
+
+    return results.sort((a, b) => (b.finishedAt || b._creationTime) - (a.finishedAt || a._creationTime));
+  }
+})
 
 // Generate a random 6-character game code
 function generateGameCode(): string {
@@ -11,42 +54,15 @@ function generateGameCode(): string {
   }
   return code
 }
-// Create a new game
-export const getUserGames = query({
-  args: { email: v.optional(v.string()) },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-
-    let playerRecords: Doc<"players">[] = [];
-    if (identity) {
-      playerRecords = await ctx.db.query("players").filter(q => q.eq(q.field("clerkId"), identity.subject)).collect();
-    } else if (args.email) {
-      playerRecords = await ctx.db.query("players").filter(q => q.eq(q.field("email"), args.email)).collect();
-    }
-
-    if (playerRecords.length === 0) return [];
-
-    // Fetch unique games
-    const gameIds = [...new Set(playerRecords.map(p => p.gameId))];
-
-    const games: Doc<"games">[] = [];
-    for (const id of gameIds) {
-      const game = await ctx.db.get(id);
-      if (game) games.push(game);
-    }
-
-    return games.sort((a, b) => (b.finishedAt || b._creationTime) - (a.finishedAt || a._creationTime));
-  }
-})
 
 export const createGame = mutation({
   args: {},
   handler: async (ctx, _) => {
     const identity = await ctx.auth.getUserIdentity()
-    if (!identity) throw new Error("Unauthorized")
+    if (!identity || !identity.subject || !identity.givenName) throw new Error("Unauthorized")
 
     // Generate short code
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase()
+    const code = generateGameCode()
 
     const gameId = await ctx.db.insert("games", {
       hostClerkId: identity.subject,
@@ -58,7 +74,7 @@ export const createGame = mutation({
     await ctx.db.insert("players", {
       gameId,
       clerkId: identity.subject,
-      name: identity.name || "Host",
+      name: identity.givenName,
       isHost: true,
     })
 
@@ -96,11 +112,10 @@ export const getGameWithDetails = query({
 export const joinGame = mutation({
   args: {
     gameId: v.id("games"),
-    guestName: v.string(),
-    guestEmail: v.optional(v.string()),
+    guestName: v.string()
   },
   handler: async (ctx, args): Promise<{ success: true; playerId: string; } | { success: false; error: string }> => {
-    const { gameId, guestName, guestEmail } = args
+    const { gameId, guestName } = args
     const game = await ctx.db.get(gameId)
     if (!game) return { success: false, error: "Game not found" }
 
@@ -125,7 +140,6 @@ export const joinGame = mutation({
       name: guestName,
       isHost: false,
       clerkId: identity?.subject, // Link if auth
-      email: guestEmail, // Store optional email
     })
 
     return { success: true, playerId }

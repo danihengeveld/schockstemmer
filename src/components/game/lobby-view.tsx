@@ -62,14 +62,14 @@ export function LobbyView({ gameCode, players, isHost, onStartGame, currentUserI
 
       {isHost ? (
         <Button
-          className="w-full h-12 text-lg font-bold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]"
+          className="w-full h-12 text-lg font-bold rounded-full shadow-md hover:shadow-lg transition-all"
           size="lg"
           onClick={onStartGame}
         >
           Start Voting Phase
         </Button>
       ) : (
-        <div className="text-center p-4 rounded-lg bg-secondary/50 text-muted-foreground text-sm animate-pulse">
+        <div className="text-center p-4 rounded-xl bg-secondary/50 text-muted-foreground text-sm animate-pulse">
           Waiting for host to start...
         </div>
       )}

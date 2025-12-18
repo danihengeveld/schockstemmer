@@ -10,25 +10,24 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Field, FieldLabel, FieldError } from "@/components/ui/field" // Import primitives
 import { useState, useEffect } from "react"
-import { useUser, SignInButton } from "@clerk/nextjs"
+import { useUser } from "@clerk/nextjs"
+import { User, Mail } from "lucide-react"
 
 interface JoinGameProps {
   gameCode?: string
-  onJoin: (name: string, email?: string) => Promise<void>
+  onJoin: (name: string) => Promise<void>
 }
 
 export function JoinGameDialog({ gameCode, onJoin }: JoinGameProps) {
   const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
   const [isJoining, setIsJoining] = useState(false)
   const { user, isSignedIn } = useUser()
 
   useEffect(() => {
     if (isSignedIn && user) {
       setName(user.firstName || "")
-      setEmail(user.primaryEmailAddress?.emailAddress || "")
     }
   }, [isSignedIn, user])
 
@@ -38,7 +37,7 @@ export function JoinGameDialog({ gameCode, onJoin }: JoinGameProps) {
 
     try {
       setIsJoining(true)
-      await onJoin(name, email || undefined)
+      await onJoin(name)
     } finally {
       setIsJoining(false)
     }
@@ -54,29 +53,23 @@ export function JoinGameDialog({ gameCode, onJoin }: JoinGameProps) {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Display Name</Label>
-            <Input
-              id="name"
-              placeholder="Your Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={isJoining}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email (Optional)</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="To track your history (Optional)"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isJoining || (isSignedIn && !!user?.primaryEmailAddress?.emailAddress)}
-            />
-          </div>
+          <Field>
+            <FieldLabel>Display Name</FieldLabel>
+            <div className="relative">
+              <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <Input
+                name="name" // Accessibility
+                placeholder="Your Name"
+                className="pl-9"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={isJoining}
+              />
+            </div>
+            {!name && isJoining && <FieldError>Name is required</FieldError>}
+          </Field>
           <DialogFooter>
-            <Button type="submit" disabled={!name || isJoining}>
+            <Button type="submit" disabled={!name || isJoining} className="rounded-full shadow-md transition-all px-8">
               {isJoining ? "Joining..." : "Join Game"}
             </Button>
           </DialogFooter>

@@ -36,20 +36,20 @@ export function VotingView({ players, currentPlayer, onVote, currentVote }: Voti
         {players.map((player) => (
           <Card
             key={player._id}
-            className={`cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${selectedId === player._id ? "border-primary bg-primary/5 ring-2 ring-primary" : ""
+            className={`cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] rounded-xl bg-background/50 backdrop-blur-sm ${selectedId === player._id ? "border-primary ring-2 ring-primary/20 shadow-md" : "border-border"
               }`}
             onClick={() => setSelectedId(player._id)}
           >
             <CardContent className="p-4 flex items-center justify-between">
               <span className="text-lg font-medium">{player.name}</span>
-              {player._id === currentPlayer?._id && <Badge variant="secondary">YOU</Badge>}
+              {player._id === currentPlayer?._id && <Badge variant="secondary" className="rounded-full">YOU</Badge>}
             </CardContent>
           </Card>
         ))}
       </div>
 
       <Button
-        className="w-full text-lg py-6"
+        className="w-full text-lg py-6 rounded-full shadow-md hover:shadow-lg transition-all"
         size="lg"
         onClick={handleVote}
         disabled={!selectedId || selectedId === currentVote}

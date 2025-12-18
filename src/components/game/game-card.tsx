@@ -13,10 +13,10 @@ export function GameCard({ children, title, className, headerContent }: GameCard
   return (
     <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <Card className={cn(
-        "border-0 shadow-2xl bg-linear-to-br from-card to-accent/5 overflow-hidden",
+        "rounded-xl border border-border shadow-sm bg-card/50 backdrop-blur-md overflow-hidden relative",
         className
       )}>
-        <div className="absolute top-0 left-0 w-full h-1 bg-primary animate-pulse" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary/50 via-primary to-primary/50 animate-pulse" />
         {(title || headerContent) && (
           <CardHeader className="text-center pb-2 relative z-10">
             {headerContent}

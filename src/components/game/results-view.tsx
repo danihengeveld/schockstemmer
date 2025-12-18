@@ -34,19 +34,19 @@ export function ResultsView({ players, votes, loserId, onLeave }: ResultsViewPro
 
   // Since Results view is more complex/wider, we override the max-w
   return (
-    <div className="w-full max-w-2xl space-y-8 animate-in fade-in duration-700">
+    <div className="w-full max-w-2xl space-y-8 animate-in fade-in duration-700 py-8">
       <div className="text-center space-y-2">
         <div className="inline-flex items-center justify-center p-3 rounded-full bg-destructive/10 text-destructive mb-4 animate-bounce">
           <Skull className="w-8 h-8" />
         </div>
-        <h1 className="text-4xl font-black">GAME OVER</h1>
+        <h1 className="text-4xl font-black tracking-tight underline decoration-destructive/30 underline-offset-8">GAME OVER</h1>
         <p className="text-muted-foreground text-lg">The results are in...</p>
       </div>
 
-      <Card className="border-2 border-destructive/20 shadow-2xl shadow-destructive/10 overflow-hidden relative bg-card">
+      <Card className="rounded-xl border border-destructive/20 shadow-xl overflow-hidden relative bg-card/50 backdrop-blur-sm transition-all hover:shadow-destructive/5 hover:border-destructive/40">
         <div className="absolute inset-0 bg-destructive/5 pointer-events-none z-0" />
         <CardHeader className="text-center pb-2 relative z-10">
-          <CardTitle className="text-xl uppercase tracking-widest text-destructive font-bold">The Loser</CardTitle>
+          <CardTitle className="text-xl uppercase tracking-widest text-destructive font-black">The Loser</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-6 py-8 relative z-10">
           <Avatar className="h-32 w-32 border-4 border-destructive shadow-xl ring-4 ring-destructive/20">
@@ -56,15 +56,15 @@ export function ResultsView({ players, votes, loserId, onLeave }: ResultsViewPro
           </Avatar>
           <div className="text-center space-y-1">
             <h2 className="text-4xl font-black tracking-tight">{loser?.name}</h2>
-            <p className="text-destructive font-bold animate-pulse">Has to drink!</p>
+            <p className="text-destructive font-bold animate-pulse text-sm uppercase tracking-widest">Has to drink!</p>
           </div>
         </CardContent>
       </Card>
 
       {drinkingBuddies.length > 0 && (
-        <Card className="bg-secondary/30 border-0">
+        <Card className="rounded-xl bg-accent/30 border border-border/50 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
+            <CardTitle className="flex items-center gap-2 text-lg font-bold">
               <Beer className="w-5 h-5 text-amber-500" />
               Drinking Buddies
             </CardTitle>
@@ -75,7 +75,7 @@ export function ResultsView({ players, votes, loserId, onLeave }: ResultsViewPro
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {drinkingBuddies.map(buddy => (
-                <Badge key={buddy._id} variant="secondary" className="px-3 py-1 text-base">
+                <Badge key={buddy._id} variant="secondary" className="px-3 py-1 rounded-full text-sm font-bold bg-secondary/80">
                   {buddy.name}
                 </Badge>
               ))}
@@ -85,22 +85,22 @@ export function ResultsView({ players, votes, loserId, onLeave }: ResultsViewPro
       )}
 
       <div className="space-y-4 pt-8">
-        <h3 className="text-center text-sm font-semibold uppercase text-muted-foreground tracking-widest">Full Voting Breakdown</h3>
+        <h3 className="text-center text-xs font-bold uppercase text-muted-foreground tracking-widest">Full Voting Breakdown</h3>
         <div className="grid gap-3">
           {players.map(player => {
             const vote = votes.find(v => v.voterId === player._id)
             const votedFor = players.find(p => p._id === vote?.votedForId)
 
             return (
-              <div key={player._id} className="flex justify-between items-center p-3 rounded-lg bg-card border shadow-sm text-sm">
-                <span className="font-medium">{player.name}</span>
-                <div className="flex items-center gap-2 text-muted-foreground">
+              <div key={player._id} className="flex justify-between items-center p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border shadow-sm text-sm transition-all hover:scale-[1.01]">
+                <span className="font-bold">{player.name}</span>
+                <div className="flex items-center gap-2 text-muted-foreground font-medium">
                   <span>voted for</span>
-                  <span className="font-bold text-foreground">{votedFor?.name || "Unknown"}</span>
+                  <span className="font-black text-foreground">{votedFor?.name || "Unknown"}</span>
                   {votedFor?._id === loserId ? (
-                    <Badge variant="destructive" className="ml-2 text-[10px]">INCORRECT</Badge>
+                    <Badge variant="destructive" className="ml-2 rounded-full text-[10px] font-black tracking-widest uppercase">INCORRECT</Badge>
                   ) : (
-                    <Badge variant="outline" className="ml-2 text-[10px] bg-green-500/10 text-green-600 border-green-200">SAFE</Badge>
+                    <Badge variant="outline" className="ml-2 rounded-full text-[10px] font-black tracking-widest uppercase bg-green-500/10 text-green-600 border-green-200">SAFE</Badge>
                   )}
                 </div>
               </div>
@@ -110,7 +110,7 @@ export function ResultsView({ players, votes, loserId, onLeave }: ResultsViewPro
       </div>
 
       <div className="flex justify-center pt-8 pb-12">
-        <Button size="lg" variant="outline" onClick={onLeave} className="min-w-[200px]">
+        <Button size="lg" variant="outline" onClick={onLeave} className="min-w-[200px] rounded-full shadow-sm hover:shadow-md transition-all">
           Back to Home
         </Button>
       </div>

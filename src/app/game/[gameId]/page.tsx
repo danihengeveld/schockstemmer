@@ -104,11 +104,10 @@ export default function GamePage() {
     })
   }
 
-  const handleJoin = async (name: string, email?: string) => {
+  const handleJoin = async (name: string) => {
     const result = await joinGame({
       gameId,
-      guestName: name,
-      guestEmail: email,
+      guestName: name
     })
 
     if (result.success) {
@@ -125,7 +124,7 @@ export default function GamePage() {
   }
 
   return (
-    <main className="min-h-screen bg-background p-4 flex flex-col items-center justify-center">
+    <main className="min-h-screen bg-background p-4 flex flex-col items-center justify-center max-w-5xl mx-auto w-full">
       {game?.status === "lobby" && (
         <LobbyView
           gameCode={game.code}

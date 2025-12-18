@@ -15,14 +15,12 @@ export default defineSchema({
   players: defineTable({
     gameId: v.id("games"),
     clerkId: v.optional(v.string()), // null for guests, set for authenticated users
-    email: v.optional(v.string()), // if added by guest, allows them to claim and find previous games later
     name: v.string(),
     isHost: v.boolean(),
   })
     .index("by_game", ["gameId"])
     .index("by_game_and_clerk", ["gameId", "clerkId"])
-    .index("by_game_and_name", ["gameId", "name"])
-    .index("by_game_and_email", ["gameId", "email"]),
+    .index("by_game_and_name", ["gameId", "name"]),
 
   // Votes - who each player thinks won't lose
   votes: defineTable({

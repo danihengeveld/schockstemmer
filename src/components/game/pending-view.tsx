@@ -75,7 +75,7 @@ export function PendingView({ players, isHost, onGameFinished }: PendingViewProp
           </div>
 
           <Button
-            className="w-full h-12 text-lg font-bold shadow-lg shadow-destructive/20"
+            className="w-full h-12 text-lg font-bold rounded-full shadow-md hover:shadow-lg transition-all"
             variant="destructive"
             disabled={!selectedLoser}
             onClick={() => selectedLoser && onGameFinished(selectedLoser)}
