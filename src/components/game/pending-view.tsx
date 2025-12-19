@@ -14,7 +14,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useState } from "react"
-import { Dices, AlertTriangle } from "lucide-react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { AlertCircleIcon, DiceIcon } from "@hugeicons/core-free-icons"
 
 interface PendingViewProps {
   roundId: Id<"rounds">
@@ -47,7 +48,7 @@ export function PendingView({ roundId, players, isHost, currentPlayerId: current
     <>
       <div className="flex justify-center mb-6">
         <div className="p-4 rounded-full bg-primary/10 text-primary shadow-sm animate-bounce">
-          <Dices className="w-10 h-10" />
+          <HugeiconsIcon icon={DiceIcon} strokeWidth={2} className="w-10 h-10" />
         </div>
       </div>
     </>
@@ -99,7 +100,7 @@ export function PendingView({ roundId, players, isHost, currentPlayerId: current
         </div>
       ) : (
         <div className="flex flex-col items-center gap-3 p-6 rounded-xl bg-amber-500/5 border border-amber-500/20 text-amber-600 dark:text-amber-500">
-          <AlertTriangle className="w-6 h-6 animate-pulse" />
+          <HugeiconsIcon icon={AlertCircleIcon} strokeWidth={2} className="w-6 h-6 animate-pulse" />
           <p className="font-semibold">Waiting for Host...</p>
           <p className="text-xs opacity-80">
             Hope you didn't vote for the loser!

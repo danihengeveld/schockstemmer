@@ -1,10 +1,9 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Trophy, Skull, History } from "lucide-react"
 import { Doc, Id } from "../../../convex/_generated/dataModel"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { ChampionIcon, TransactionHistoryIcon } from "@hugeicons/core-free-icons"
 
 interface RoundHistoryProps {
   rounds: Doc<"rounds">[]
@@ -55,7 +54,7 @@ export function RoundHistory({ rounds, players, allVotes }: RoundHistoryProps) {
         {/* Leaderboard */}
         <div className="space-y-4">
           <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-primary/80">
-            <Trophy className="w-4 h-4" />
+            <HugeiconsIcon icon={ChampionIcon} strokeWidth={2} className="w-4 h-4" />
             Hall of Shame
           </h3>
           <div className="grid gap-2">
@@ -85,7 +84,7 @@ export function RoundHistory({ rounds, players, allVotes }: RoundHistoryProps) {
         {finishedRounds.length > 0 && (
           <div className="space-y-4">
             <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-muted-foreground">
-              <History className="w-4 h-4" />
+              <HugeiconsIcon icon={TransactionHistoryIcon} strokeWidth={2} className="w-4 h-4" />
               Round History
             </h3>
             <div className="grid gap-2">

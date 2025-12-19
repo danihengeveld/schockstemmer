@@ -9,7 +9,8 @@ import { SignInButton, useUser } from "@clerk/nextjs"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
-import { Key } from "lucide-react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { Key01Icon } from "@hugeicons/core-free-icons"
 
 export default function Home() {
   const router = useRouter()
@@ -85,7 +86,7 @@ export default function Home() {
             )}
 
             <div className="relative flex items-center w-full sm:w-auto">
-              <Key className="absolute left-3 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
+              <HugeiconsIcon icon={Key01Icon} strokeWidth={2} className="absolute left-4 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
               <Input
                 placeholder="Enter Game Code"
                 className="h-14 pl-10 border shadow-sm w-full sm:w-64 focus-visible:ring-primary rounded-full"
