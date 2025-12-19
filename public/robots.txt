@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://schockstemmer.hengeveld.dev/sitemap.xml

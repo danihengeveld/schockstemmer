@@ -36,14 +36,6 @@ export const metadata: Metadata = {
     description: "The ultimate Schocken companion app. Place your bets, track your losses.",
     url: "https://schockstemmer.hengeveld.dev",
     siteName: "SchockStemmer",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 512,
-        height: 512,
-        alt: "SchockStemmer - The Ultimate Schocken Companion",
-      },
-    ],
     locale: "en_US",
     type: "website",
   },
@@ -64,8 +56,7 @@ export const metadata: Metadata = {
       "max-image-preview": "large",
       "max-snippet": -1,
     },
-  },
-  manifest: "/manifest.json"
+  }
 };
 
 export const viewport: Viewport = {
@@ -74,9 +65,7 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: dark)", color: "#020617" }, // Matching shadcn slate-950 background
   ],
   width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  initialScale: 1
 };
 
 export default function RootLayout({

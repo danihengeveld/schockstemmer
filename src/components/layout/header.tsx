@@ -9,6 +9,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Share08Icon } from "@hugeicons/core-free-icons"
+import logo from "../../app/icon.png"
 
 export function Header() {
   const { isSignedIn, user } = useUser()
@@ -36,7 +37,7 @@ export function Header() {
     <header className="w-full border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 h-16 flex justify-between items-center w-full">
         <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity whitespace-nowrap overflow-hidden">
-          <Image src="/icon.png" alt="SchockStemmer Logo" width={180} height={180} className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/10 border border-primary/20 shadow-sm shrink-0" />
+          <Image src={logo} alt="SchockStemmer Logo" className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/10 border border-primary/20 shadow-sm shrink-0" />
           <span className="font-bold text-xl sm:text-2xl tracking-tighter hidden sm:block">SchockStemmer</span>
         </Link>
         <div className="flex gap-2 sm:gap-4 items-center shrink-0">
