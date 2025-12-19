@@ -6,7 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Loader2, Users, Trophy, Calendar, ExternalLink, History as HistoryIcon } from "lucide-react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Loading03Icon,
+  UserGroupIcon,
+  ChampionIcon,
+  Calendar03Icon,
+  ArrowUpRight01Icon,
+  TransactionHistoryIcon
+} from "@hugeicons/core-free-icons"
 
 export default function HistoryPage() {
   const games = useQuery(api.games.getUserGames)
@@ -14,7 +22,7 @@ export default function HistoryPage() {
   if (!games) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <HugeiconsIcon icon={Loading03Icon} strokeWidth={2} className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
   }
@@ -24,7 +32,7 @@ export default function HistoryPage() {
       <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-6">
         <div className="space-y-1">
           <h1 className="text-4xl font-extrabold tracking-tight flex items-center gap-3">
-            <HistoryIcon className="h-8 w-8 text-primary" />
+            <HugeiconsIcon icon={TransactionHistoryIcon} strokeWidth={2} className="h-8 w-8 text-primary" />
             Game History
           </h1>
           <p className="text-muted-foreground">Review your past games and see who had to pay.</p>
@@ -40,7 +48,7 @@ export default function HistoryPage() {
         <Card className="w-full bg-card/50 backdrop-blur-sm border-dashed rounded-xl py-12">
           <CardContent className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="h-16 w-16 rounded-full bg-accent flex items-center justify-center">
-              <HistoryIcon className="h-8 w-8 text-muted-foreground" />
+              <HugeiconsIcon icon={TransactionHistoryIcon} strokeWidth={2} className="h-8 w-8 text-muted-foreground" />
             </div>
             <div className="space-y-2">
               <CardTitle className="text-xl">No games played yet</CardTitle>
@@ -73,18 +81,18 @@ export default function HistoryPage() {
                   </div>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
+                      <HugeiconsIcon icon={Calendar03Icon} strokeWidth={2} className="h-3 w-3" />
                       {new Date(game._creationTime).toLocaleDateString()}
                     </span>
                     <span className="flex items-center gap-1">
-                      <Users className="h-3 w-3" />
+                      <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} className="h-3 w-3" />
                       {game.playerCount} {game.playerCount === 1 ? 'Player' : 'Players'}
                     </span>
                   </div>
                 </div>
                 <Link href={`/game/${game._id}`}>
                   <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary hover:text-primary-foreground transition-colors">
-                    <ExternalLink className="h-4 w-4" />
+                    <HugeiconsIcon icon={ArrowUpRight01Icon} strokeWidth={2} className="h-4 w-4" />
                   </Button>
                 </Link>
               </CardHeader>
@@ -93,7 +101,7 @@ export default function HistoryPage() {
                   <div className="p-3 rounded-xl bg-accent/30 border border-border flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Trophy className="h-5 w-5 text-primary" />
+                        <HugeiconsIcon icon={ChampionIcon} strokeWidth={2} className="h-5 w-5 text-primary" />
                       </div>
                       <div>
                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">The Loser</p>
@@ -121,7 +129,7 @@ export default function HistoryPage() {
                   {game.status === 'finished' ? 'Session Closed' : 'Active Session'}
                 </span>
                 <Link href={`/game/${game._id}`} className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 transition-all">
-                  View Game Details <ExternalLink className="h-3 w-3" />
+                  View Game Details <HugeiconsIcon icon={ArrowUpRight01Icon} strokeWidth={2} className="h-3 w-3" />
                 </Link>
               </CardFooter>
             </Card>

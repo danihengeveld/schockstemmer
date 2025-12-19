@@ -6,7 +6,13 @@ import { Id } from "../../../convex/_generated/dataModel"
 import { Doc } from "../../../convex/_generated/dataModel"
 import { toast } from "sonner"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Loader2, Users, Share2, Check } from "lucide-react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Loading03Icon,
+  UserGroupIcon,
+  Share01Icon,
+  CheckmarkCircle02Icon
+} from "@hugeicons/core-free-icons"
 import { useState } from "react"
 
 interface LobbyViewProps {
@@ -62,7 +68,7 @@ export function LobbyView({ gameId, gameCode, players, isHost, currentPlayerId }
 
   const title = (
     <div className="flex items-center justify-center gap-2 text-xl font-normal">
-      <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+      <HugeiconsIcon icon={Loading03Icon} strokeWidth={2} className="w-5 h-5 animate-spin text-muted-foreground" />
       Waiting for players...
     </div>
   )
@@ -71,7 +77,7 @@ export function LobbyView({ gameId, gameCode, players, isHost, currentPlayerId }
     <GameCard headerContent={headerContent} title={title}>
       <div className="space-y-4 text-left">
         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground px-1">
-          <Users className="w-4 h-4" />
+          <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} className="w-4 h-4" />
           {players.length} Players Joined
         </div>
         <div className="grid grid-cols-1 gap-2">
@@ -118,9 +124,9 @@ export function LobbyView({ gameId, gameCode, players, isHost, currentPlayerId }
           onClick={handleShare}
         >
           {copied ? (
-            <Check className="w-4 h-4 mr-2 text-green-500" />
+            <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} className="w-4 h-4 mr-2 text-green-500" />
           ) : (
-            <Share2 className="w-4 h-4 mr-2" />
+            <HugeiconsIcon icon={Share01Icon} strokeWidth={2} className="w-4 h-4 mr-2" />
           )}
           {copied ? "Copied!" : "Invite Friends"}
         </Button>

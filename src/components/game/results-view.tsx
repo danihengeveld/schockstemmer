@@ -16,7 +16,13 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useMutation } from "convex/react"
-import { Beer, LogOut, Power, Skull } from "lucide-react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  DrinkIcon,
+  Logout01Icon,
+  ShutDownIcon,
+  SkullIcon
+} from "@hugeicons/core-free-icons"
 import { api } from "../../../convex/_generated/api"
 import { Doc, Id } from "../../../convex/_generated/dataModel"
 
@@ -67,7 +73,7 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, 
     <div className="w-full max-w-2xl space-y-8 animate-in fade-in duration-700 py-8">
       <div className="text-center space-y-2">
         <div className="inline-flex items-center justify-center p-3 rounded-full bg-destructive/10 text-destructive mb-4 animate-bounce">
-          <Skull className="w-8 h-8" />
+          <HugeiconsIcon icon={SkullIcon} strokeWidth={2} className="w-8 h-8" />
         </div>
         <h1 className="text-4xl font-black tracking-tight underline decoration-destructive/30 underline-offset-8">ROUND OVER</h1>
         <p className="text-muted-foreground text-lg">The results are in...</p>
@@ -104,7 +110,7 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, 
         <Card className="rounded-xl bg-accent/30 border border-border/50 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg font-bold">
-              <Beer className="w-5 h-5 text-amber-500" />
+              <HugeiconsIcon icon={DrinkIcon} strokeWidth={2} className="w-5 h-5 text-amber-500" />
               Drinking Buddies
             </CardTitle>
             <p className="text-sm text-muted-foreground">
@@ -172,7 +178,7 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, 
                     variant="secondary"
                     className="flex-1 sm:flex-none min-w-[200px] rounded-full shadow-md hover:shadow-lg transition-all font-black uppercase tracking-widest"
                   >
-                    <Power className="w-4 h-4 mr-2" />
+                    <HugeiconsIcon icon={ShutDownIcon} strokeWidth={2} className="w-4 h-4 mr-2" />
                     End Session
                   </Button>
                 }
@@ -196,7 +202,7 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, 
         )}
         {gameStatus !== "finished" && (
           <Button size="lg" variant="outline" onClick={onLeave} className="min-w-[200px] rounded-full shadow-sm hover:shadow-md transition-all">
-            <LogOut className="w-4 h-4 mr-2" />
+            <HugeiconsIcon icon={Logout01Icon} strokeWidth={2} className="w-4 h-4 mr-2" />
             <span>Leave Game</span>
           </Button>
         )}

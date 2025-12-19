@@ -13,7 +13,8 @@ import { Input } from "@/components/ui/input"
 import { Field, FieldLabel, FieldError } from "@/components/ui/field" // Import primitives
 import { useState, useEffect } from "react"
 import { useUser } from "@clerk/nextjs"
-import { User } from "lucide-react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { UserIcon } from "@hugeicons/core-free-icons"
 
 interface JoinGameProps {
   gameCode?: string
@@ -56,7 +57,7 @@ export function JoinGameDialog({ gameCode, onJoin }: JoinGameProps) {
           <Field>
             <FieldLabel>Display Name</FieldLabel>
             <div className="relative">
-              <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <HugeiconsIcon icon={UserIcon} strokeWidth={2} className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
               <Input
                 name="name" // Accessibility
                 placeholder="Your Name"
