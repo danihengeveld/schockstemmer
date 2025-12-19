@@ -43,7 +43,6 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "SchockStemmer",
     description: "The ultimate Schocken companion app.",
-    images: ["/og-image.png"],
     creator: "@DHengeveld",
   },
   robots: {
