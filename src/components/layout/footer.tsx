@@ -1,6 +1,7 @@
-import { GithubIcon } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "../ui/badge";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Github01Icon } from "@hugeicons/core-free-icons";
 
 export function Footer() {
   return (
@@ -13,7 +14,7 @@ export function Footer() {
 
         <div className="flex items-center gap-6">
           <Link href="https://github.com/danihengeveld/schockstemmer" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-all flex items-center gap-2">
-            <GithubIcon className="w-5 h-5" aria-hidden="true" />
+            <HugeiconsIcon icon={Github01Icon} strokeWidth={2} className="w-5 h-5" />
             <span>Repository</span>
           </Link>
           <Badge>v1.0.0</Badge>

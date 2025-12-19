@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button"
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs"
 import { usePathname } from "next/navigation"
 import { toast } from "sonner"
-import { Share2 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { Share08Icon } from "@hugeicons/core-free-icons"
 
 export function Header() {
   const { isSignedIn, user } = useUser()
@@ -47,7 +48,7 @@ export function Header() {
                 className="rounded-full gap-2 border-primary/20 hover:border-primary/50 h-8 sm:h-9"
                 onClick={handleShare}
               >
-                <Share2 className="w-3.5 h-3.5" />
+                <HugeiconsIcon icon={Share08Icon} strokeWidth={2} className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Invite</span>
               </Button>
             </div>
