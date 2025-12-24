@@ -16,7 +16,7 @@ The ultimate Schocken companion app. Track your games, vote on losers, and avoid
 - **Database & Backend**: [Convex](https://convex.dev)
 - **Authentication**: [Clerk](https://clerk.com)
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com) & [Shadcn UI](https://ui.shadcn.com)
-- **Icons**: [Lucide React](https://lucide.dev)
+- **Icons**: [Hugeicons React](https://github.com/hugeicons/react)
 
 ## 🚀 Getting Started
 
@@ -34,9 +34,14 @@ The ultimate Schocken companion app. Track your games, vote on losers, and avoid
 3. **Set up environment variables**:
    Create a `.env.local` file and add your Clerk and Convex keys.
 
+4. **Create Convex dev environment**:
+   ```bash
+   pnpm exec convex dev
+   ```
+
 4. **Run the development server**:
    ```bash
-   npm run dev
+   pnpm dev
    ```
 
 Open [http://localhost:3000](http://localhost:3000) to start playing.
