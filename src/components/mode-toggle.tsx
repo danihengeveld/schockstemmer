@@ -2,7 +2,7 @@
 
 import { useTheme } from "next-themes"
 
-import { Button, buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,

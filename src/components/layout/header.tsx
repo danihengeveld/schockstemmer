@@ -3,7 +3,10 @@
 import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs"
-import { usePathname } from "next/navigation"
+import { useQuery } from "convex/react"
+import { api } from "../../../convex/_generated/api"
+import { Id } from "../../../convex/_generated/dataModel"
+import { useParams } from "next/navigation"
 import { toast } from "sonner"
 import Link from "next/link"
 import Image from "next/image"
@@ -13,8 +16,12 @@ import logo from "../../app/icon.png"
 
 export function Header() {
   const { isSignedIn, user } = useUser()
-  const pathname = usePathname()
-  const isGamePage = pathname.startsWith('/game/')
+  const params = useParams()
+
+  const gameId = params?.gameId as Id<"games"> | undefined
+  const game = useQuery(api.games.getGameWithDetails, gameId ? { gameId } : "skip")?.game
+
+  const showInvite = !!gameId && game?.status !== "finished"
 
   const handleShare = async () => {
     const url = window.location.href
@@ -28,7 +35,7 @@ export function Header() {
         await navigator.clipboard.writeText(url)
         toast.success("Invite link copied!")
       }
-    } catch (err) {
+    } catch {
       // Ignore abort errors
     }
   }
@@ -41,7 +48,7 @@ export function Header() {
           <span className="font-bold text-xl sm:text-2xl tracking-tighter hidden sm:block">SchockStemmer</span>
         </Link>
         <div className="flex gap-2 sm:gap-4 items-center shrink-0">
-          {isGamePage && (
+          {showInvite && (
             <div className="flex items-center gap-1 sm:gap-2">
               <Button
                 variant="outline"

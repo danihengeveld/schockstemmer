@@ -46,8 +46,8 @@ export function PendingView({ roundId, players, isHost, currentPlayerId: current
 
   const headerContent = (
     <>
-      <div className="flex justify-center mb-6">
-        <div className="p-4 rounded-full bg-primary/10 text-primary shadow-sm animate-bounce">
+      <div className="flex justify-center mb-6 pt-4">
+        <div className="p-4 rounded-full bg-primary/10 text-primary shadow-sm animate-wiggle">
           <HugeiconsIcon icon={DiceIcon} strokeWidth={2} className="w-10 h-10" />
         </div>
       </div>
@@ -103,7 +103,7 @@ export function PendingView({ roundId, players, isHost, currentPlayerId: current
           <HugeiconsIcon icon={AlertCircleIcon} strokeWidth={2} className="w-6 h-6 animate-pulse" />
           <p className="font-semibold">Waiting for Host...</p>
           <p className="text-xs opacity-80">
-            Hope you didn't vote for the loser!
+            Hope you didn&apos;t vote for the loser!
           </p>
         </div>
       )}

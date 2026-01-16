@@ -7,7 +7,7 @@ import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next"
 import { Inter } from "next/font/google";
 import { shadcn } from '@clerk/themes'
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
@@ -84,7 +84,7 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <Header />
-              <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8">
+              <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-4 sm:py-8">
                 {children}
               </main>
               <Footer />

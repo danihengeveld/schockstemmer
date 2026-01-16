@@ -1,7 +1,7 @@
 "use client"
 
 import { Badge } from "@/components/ui/badge"
-import { Doc, Id } from "../../../convex/_generated/dataModel"
+import { Doc } from "../../../convex/_generated/dataModel"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ChampionIcon, TransactionHistoryIcon } from "@hugeicons/core-free-icons"
 
