@@ -17,7 +17,7 @@ export function Footer() {
             <HugeiconsIcon icon={Github01Icon} strokeWidth={2} className="w-5 h-5" />
             <span>Repository</span>
           </Link>
-          <Badge>v1.0.0</Badge>
+          <Badge>v1.1.0</Badge>
         </div>
       </div>
     </footer>
