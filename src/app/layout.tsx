@@ -84,7 +84,7 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <Header />
-              <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8">
+              <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-4 sm:py-8">
                 {children}
               </main>
               <Footer />

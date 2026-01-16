@@ -125,7 +125,7 @@ export default function GamePage() {
   }
 
   return (
-    <main className="min-h-screen bg-background p-4 flex flex-col items-center justify-center max-w-5xl mx-auto w-full">
+    <div className="flex-1 flex flex-col items-center justify-center w-full py-4 sm:py-8">
       {game?.status === "lobby" && currentPlayer && (
         <LobbyView
           gameId={gameId}
@@ -185,6 +185,6 @@ export default function GamePage() {
 
       {/* Persistent History & Leaderboard */}
       <RoundHistory rounds={rounds} players={players} allVotes={data?.allVotes || []} />
-    </main>
+    </div>
   )
 }

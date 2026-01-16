@@ -164,25 +164,27 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, 
         </div>
       </div>
 
-      <div className="flex flex-col items-center gap-4 pt-8 pb-12">
+      <div className="flex flex-col gap-3 w-full max-w-sm mx-auto pt-8 pb-12">
         {isHost && (
-          <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-            <Button size="lg" onClick={handleNextRound} className="flex-1 sm:flex-none min-w-[200px] rounded-full shadow-lg hover:shadow-xl transition-all font-black uppercase tracking-widest">
+          <>
+            <Button
+              size="lg"
+              onClick={handleNextRound}
+              className="w-full h-12 rounded-full shadow-lg hover:shadow-xl transition-all font-bold uppercase tracking-widest"
+            >
               Next Round
             </Button>
             <AlertDialog>
-              <AlertDialogTrigger
-                render={
-                  <Button
-                    size="lg"
-                    variant="secondary"
-                    className="flex-1 sm:flex-none min-w-[200px] rounded-full shadow-md hover:shadow-lg transition-all font-black uppercase tracking-widest"
-                  >
-                    <HugeiconsIcon icon={ShutDownIcon} strokeWidth={2} className="w-4 h-4 mr-2" />
-                    End Session
-                  </Button>
-                }
-              />
+              <AlertDialogTrigger>
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="w-full h-12 rounded-full shadow-md hover:shadow-lg transition-all font-bold uppercase tracking-widest"
+                >
+                  <HugeiconsIcon icon={ShutDownIcon} strokeWidth={2} className="w-4 h-4 mr-2" />
+                  End Session
+                </Button>
+              </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>End Game Session?</AlertDialogTitle>
@@ -198,10 +200,15 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, 
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-          </div>
+          </>
         )}
         {gameStatus !== "finished" && (
-          <Button size="lg" variant="outline" onClick={onLeave} className="min-w-[200px] rounded-full shadow-sm hover:shadow-md transition-all">
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={onLeave}
+            className="w-full h-12 rounded-full shadow-sm hover:shadow-md transition-all font-bold uppercase tracking-widest"
+          >
             <HugeiconsIcon icon={Logout01Icon} strokeWidth={2} className="w-4 h-4 mr-2" />
             <span>Leave Game</span>
           </Button>

@@ -60,7 +60,7 @@ export function LobbyView({ gameId, gameCode, players, isHost, currentPlayerId }
   const headerContent = (
     <div className="flex flex-col items-center gap-2">
       <span className="text-sm uppercase tracking-widest text-muted-foreground font-semibold">Join Code</span>
-      <div className="text-6xl font-black tracking-tighter text-primary animate-in zoom-in duration-500">
+      <div className="text-5xl sm:text-6xl font-black tracking-tighter text-primary animate-in zoom-in duration-500">
         {gameCode}
       </div>
     </div>

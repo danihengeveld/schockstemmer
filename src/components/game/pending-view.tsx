@@ -46,8 +46,8 @@ export function PendingView({ roundId, players, isHost, currentPlayerId: current
 
   const headerContent = (
     <>
-      <div className="flex justify-center mb-6">
-        <div className="p-4 rounded-full bg-primary/10 text-primary shadow-sm animate-bounce">
+      <div className="flex justify-center mb-6 pt-4">
+        <div className="p-4 rounded-full bg-primary/10 text-primary shadow-sm animate-wiggle">
           <HugeiconsIcon icon={DiceIcon} strokeWidth={2} className="w-10 h-10" />
         </div>
       </div>

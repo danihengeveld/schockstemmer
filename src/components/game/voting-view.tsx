@@ -57,7 +57,7 @@ export function VotingView({ roundId, voterId, players, currentPlayerId, current
       </div>
 
       <Button
-        className="w-full text-lg py-6 rounded-full shadow-md hover:shadow-lg transition-all"
+        className="w-full h-12 text-lg font-bold rounded-full shadow-md hover:shadow-lg transition-all"
         size="lg"
         onClick={handleVote}
         disabled={!selectedId || selectedId === currentVote}
