@@ -103,7 +103,7 @@ export function PendingView({ roundId, players, isHost, currentPlayerId: current
           <HugeiconsIcon icon={AlertCircleIcon} strokeWidth={2} className="w-6 h-6 animate-pulse" />
           <p className="font-semibold">Waiting for Host...</p>
           <p className="text-xs opacity-80">
-            Hope you didn't vote for the loser!
+            Hope you didn&apos;t vote for the loser!
           </p>
         </div>
       )}

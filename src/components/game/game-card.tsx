@@ -29,7 +29,7 @@ export function GameCard({ children, title, className, headerContent }: GameCard
       </Card>
 
       <div className="text-center text-xs text-muted-foreground opacity-50 font-mono tracking-widest uppercase">
-        Don't spill your drink
+        Don&apos;t spill your drink
       </div>
     </div>
   )

@@ -11,20 +11,19 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useMutation } from "convex/react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
-  DrinkIcon,
   Logout01Icon,
   ShutDownIcon,
   SkullIcon
 } from "@hugeicons/core-free-icons"
 import { api } from "../../../convex/_generated/api"
 import { Doc, Id } from "../../../convex/_generated/dataModel"
+import { LoserCard } from "./results/loser-card"
+import { DrinkingBuddiesCard } from "./results/drinking-buddies-card"
+import { VotingBreakdown } from "./results/voting-breakdown"
 
 interface ResultsViewProps {
   gameId: Id<"games">
@@ -62,13 +61,6 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, 
     .map(v => players.find(p => p._id === v.voterId))
     .filter((p): p is Doc<"players"> => !!p)
 
-  // Calculate vote counts
-  const voteCounts = new Map<string, number>()
-  votes.forEach(v => {
-    const count = voteCounts.get(v.votedForId) || 0
-    voteCounts.set(v.votedForId, count + 1)
-  })
-
   return (
     <div className="w-full max-w-2xl space-y-8 animate-in fade-in duration-700 py-8">
       <div className="text-center space-y-2">
@@ -79,90 +71,23 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, 
         <p className="text-muted-foreground text-lg">The results are in...</p>
       </div>
 
-      <Card className="rounded-xl border border-destructive/20 shadow-xl overflow-hidden relative bg-card/50 backdrop-blur-sm transition-all hover:shadow-destructive/5 hover:border-destructive/40">
-        <div className="absolute inset-0 bg-destructive/5 pointer-events-none z-0" />
-        <CardHeader className="text-center pb-2 relative z-10">
-          <CardTitle className="text-xl uppercase tracking-widest text-destructive font-black">The Loser</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center gap-6 py-8 relative z-10">
-          <Avatar className="h-32 w-32 border-4 border-destructive shadow-xl ring-4 ring-destructive/20">
-            <AvatarFallback className="bg-destructive text-destructive-foreground text-4xl font-black">
-              {loser?.name.substring(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="text-center space-y-1">
-            <h2 className="text-4xl font-black tracking-tight">{loser?.name}</h2>
-            <div className="flex flex-col items-center gap-1">
-              <p className="text-destructive font-bold animate-pulse text-sm uppercase tracking-widest">
-                Has to take {loserShots} {loserShots === 1 ? 'shot' : 'shots'}!
-              </p>
-              {loserVotedForSelf && (
-                <Badge variant="destructive" className="rounded-full text-[10px] uppercase font-black tracking-widest">
-                  Self-Vote Penalty x2
-                </Badge>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <LoserCard
+        loser={loser}
+        loserShots={loserShots}
+        loserVotedForSelf={loserVotedForSelf}
+      />
 
-      {drinkingBuddies.length > 0 && (
-        <Card className="rounded-xl bg-accent/30 border border-border/50 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg font-bold">
-              <HugeiconsIcon icon={DrinkIcon} strokeWidth={2} className="w-5 h-5 text-amber-500" />
-              Drinking Buddies
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              These people thought {loser?.name} was safe. 1 shot each!
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {drinkingBuddies.map(buddy => (
-                <Badge key={buddy._id} variant="secondary" className="px-3 py-1 rounded-full">
-                  {buddy.name}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <DrinkingBuddiesCard
+        drinkingBuddies={drinkingBuddies}
+        loser={loser}
+      />
 
-      <div className="space-y-4 pt-8">
-        <h3 className="text-center text-xs font-bold uppercase text-muted-foreground tracking-widest">Full Voting Breakdown</h3>
-        <div className="grid gap-3">
-          {players.map(player => {
-            const vote = votes.find(v => v.voterId === player._id)
-            const votedFor = players.find(p => p._id === vote?.votedForId)
-            const isLoser = player._id === loserId
-            const isDrinkingBuddy = vote?.votedForId === loserId && !isLoser
-            const shots = isLoser ? (loserVotedForSelf ? 2 : 1) : (isDrinkingBuddy ? 1 : 0)
-
-            return (
-              <div key={player._id} className="flex justify-between items-center p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border shadow-sm text-sm transition-all hover:scale-[1.01]">
-                <div className="flex flex-col">
-                  <span className="font-bold">{player.name}{player.hasLeft && <span className="text-muted-foreground font-normal ml-1">(Left)</span>}</span>
-                  {shots > 0 && (
-                    <span className="text-[10px] text-destructive font-black uppercase tracking-tighter">
-                      Take {shots} {shots === 1 ? 'shot' : 'shots'}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground font-medium text-right">
-                  <span className="hidden sm:inline">voted for</span>
-                  <span className="font-black text-foreground">{votedFor?.name || "Unknown"}</span>
-                  {votedFor?._id === loserId ? (
-                    <Badge variant="destructive" className="ml-2 rounded-full text-[10px] font-black tracking-widest uppercase">INCORRECT</Badge>
-                  ) : (
-                    <Badge variant="outline" className="ml-2 rounded-full text-[10px] font-black tracking-widest uppercase bg-green-500/10 text-green-600 border-green-200">SAFE</Badge>
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
+      <VotingBreakdown
+        players={players}
+        votes={votes}
+        loserId={loserId}
+        loserVotedForSelf={loserVotedForSelf}
+      />
 
       <div className="flex flex-col gap-3 w-full max-w-sm mx-auto pt-8 pb-12">
         {isHost && (
@@ -175,7 +100,7 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, 
               Next Round
             </Button>
             <AlertDialog>
-              <AlertDialogTrigger>
+              <AlertDialogTrigger render={
                 <Button
                   size="lg"
                   variant="secondary"
@@ -184,7 +109,7 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, 
                   <HugeiconsIcon icon={ShutDownIcon} strokeWidth={2} className="w-4 h-4 mr-2" />
                   End Session
                 </Button>
-              </AlertDialogTrigger>
+              } />
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>End Game Session?</AlertDialogTitle>

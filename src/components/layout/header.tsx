@@ -35,7 +35,7 @@ export function Header() {
         await navigator.clipboard.writeText(url)
         toast.success("Invite link copied!")
       }
-    } catch (err) {
+    } catch {
       // Ignore abort errors
     }
   }
