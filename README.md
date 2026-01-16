@@ -46,8 +46,20 @@ The ultimate Schocken companion app. Track your games, vote on losers, and avoid
 
 Open [http://localhost:3000](http://localhost:3000) to start playing.
 
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+## 📝 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
 ## 👤 Author
 
 **Dani Hengeveld**
 - Website: [dani.hengeveld.dev](https://dani.hengeveld.dev)
 - GitHub: [@danihengeveld](https://github.com/danihengeveld)
+
+---
+
+Built with ❤️ using Next.js 16, React 19.2, Convex, Clerk, and modern web technologies.
