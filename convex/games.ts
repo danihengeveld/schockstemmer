@@ -1,6 +1,6 @@
 import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
-import type { Doc, Id } from "./_generated/dataModel"
+import type { Doc, Id, MutationCtx } from "./_generated/dataModel"
 
 // ========== Helper Functions ==========
 
@@ -52,7 +52,7 @@ function generateGameCode(): string {
  * Verify that a player is the host and authorized to perform host actions.
  */
 async function verifyHostAuthorization(
-  ctx: any,
+  ctx: MutationCtx,
   playerId: Id<"players">,
   gameId: Id<"games">
 ): Promise<void> {
@@ -175,7 +175,7 @@ export const getGameWithDetails = query({
       .filter((q) => q.eq(q.field("gameId"), args.gameId))
       .collect()
 
-    const ALL_rounds = await ctx.db
+    const allRounds = await ctx.db
       .query("rounds")
       .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
       .collect()
@@ -183,18 +183,18 @@ export const getGameWithDetails = query({
     const allVotes = await ctx.db
       .query("votes")
       .filter((q) => q.or(
-        ...ALL_rounds.map(r => q.eq(q.field("roundId"), r._id))
+        ...allRounds.map(r => q.eq(q.field("roundId"), r._id))
       ))
       .collect()
 
-    const activeRound = ALL_rounds.find(r => r.status !== "finished") 
-      || ALL_rounds.sort((a, b) => b.roundNumber - a.roundNumber)[0];
+    const activeRound = allRounds.find(r => r.status !== "finished") 
+      || allRounds.sort((a, b) => b.roundNumber - a.roundNumber)[0];
 
     const currentVotes = activeRound 
       ? allVotes.filter(v => v.roundId === activeRound._id) 
       : [];
 
-    return { game, players, activeRound, votes: currentVotes, allVotes, rounds: ALL_rounds }
+    return { game, players, activeRound, votes: currentVotes, allVotes, rounds: allRounds }
   },
 })
 
