@@ -1,5 +1,5 @@
-import { query } from "../_generated/server"
-import { calculatePlayerShots } from "../lib/helpers"
+import { query } from "./_generated/server"
+import { calculatePlayerShots } from "./lib/helpers"
 
 export default query({
   args: {},
