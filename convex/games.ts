@@ -1,73 +1,8 @@
 import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
-import type { Doc, Id, MutationCtx } from "./_generated/dataModel"
-
-// ========== Helper Functions ==========
-
-/**
- * Calculate total shots for a player across all finished rounds.
- * Rules: Loser drinks 1-2 shots, voters who picked loser drink 1.
- */
-function calculatePlayerShots(
-  player: Doc<"players">,
-  finishedRounds: Doc<"rounds">[],
-  allVotes: Doc<"votes">[]
-): number {
-  let totalShots = 0;
-  
-  finishedRounds.forEach(round => {
-    if (!round.loserId) return;
-
-    const roundVotes = allVotes.filter(v => v.roundId === round._id);
-    const isLoser = round.loserId === player._id;
-    const playerVote = roundVotes.find(v => v.voterId === player._id);
-    const votedForLoser = playerVote?.votedForId === round.loserId;
-
-    if (isLoser) {
-      // Loser drinks 1, or 2 if they voted for themselves
-      const selfVoted = playerVote?.votedForId === player._id;
-      totalShots += selfVoted ? 2 : 1;
-    } else if (votedForLoser) {
-      // Safe players who voted for the loser drink 1
-      totalShots += 1;
-    }
-  });
-  
-  return totalShots;
-}
-
-/**
- * Generate a random 6-character game code.
- */
-function generateGameCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-  let code = ""
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return code
-}
-
-/**
- * Verify that a player is the host and authorized to perform host actions.
- */
-async function verifyHostAuthorization(
-  ctx: MutationCtx,
-  playerId: Id<"players">,
-  gameId: Id<"games">
-): Promise<void> {
-  const player = await ctx.db.get(playerId)
-
-  if (!player || player.gameId !== gameId || !player.isHost) {
-    throw new Error("Only the host can perform this action")
-  }
-
-  // Verify authentication if player has a linked account
-  const identity = await ctx.auth.getUserIdentity()
-  if (player.clerkId && (!identity || identity.subject !== player.clerkId)) {
-    throw new Error("Unauthorized host action")
-  }
-}
+import type { MutationCtx } from "./_generated/dataModel"
+import { calculatePlayerShots, generateGameCode } from "./lib/helpers"
+import { verifyHostAuthorization } from "./lib/auth"
 
 // ========== Queries ==========
 
