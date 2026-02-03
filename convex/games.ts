@@ -36,12 +36,14 @@ export const getUserGames = query({
       const latestRound = allRounds.sort((a, b) => b.roundNumber - a.roundNumber)[0];
 
       // Get all votes for this game
-      const allVotes = await ctx.db
-        .query("votes")
-        .filter((q) => q.or(
-          ...allRounds.map(r => q.eq(q.field("roundId"), r._id))
-        ))
-        .collect()
+      const allVotes = allRounds.length > 0 
+        ? await ctx.db
+            .query("votes")
+            .filter((q) => q.or(
+              ...allRounds.map(r => q.eq(q.field("roundId"), r._id))
+            ))
+            .collect()
+        : [];
 
       // Calculate total shots per player across all rounds
       const playerStats = players.map(player => {
