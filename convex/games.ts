@@ -68,8 +68,8 @@ export const getUserGames = query({
         return { playerId: player._id, playerName: player.name, totalShots };
       }).sort((a, b) => b.totalShots - a.totalShots);
 
-      // Find the overall worst player (most shots)
-      const worstPlayer = playerStats[0];
+      // Find the overall worst player (most shots), only if there are players and finished rounds
+      const worstPlayer = playerStats.length > 0 && finishedRounds.length > 0 ? playerStats[0] : null;
 
       let loserName = null;
       if (latestRound?.loserId) {
