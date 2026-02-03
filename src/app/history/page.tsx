@@ -88,6 +88,11 @@ export default function HistoryPage() {
                       <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} className="h-3 w-3" />
                       {game.playerCount} {game.playerCount === 1 ? 'Player' : 'Players'}
                     </span>
+                    {game.totalRounds > 0 && (
+                      <span className="flex items-center gap-1 text-primary font-semibold">
+                        {game.totalRounds} {game.totalRounds === 1 ? 'Round' : 'Rounds'}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <Link href={`/game/${game._id}`}>
@@ -98,24 +103,41 @@ export default function HistoryPage() {
               </CardHeader>
               <CardContent className="pb-4">
                 {game.status === "finished" ? (
-                  <div className="p-3 rounded-xl bg-accent/30 border border-border flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <HugeiconsIcon icon={ChampionIcon} strokeWidth={2} className="h-5 w-5 text-primary" />
+                  <div className="space-y-3">
+                    {game.totalRounds > 1 && (
+                      <div className="p-2 rounded-lg bg-primary/5 border border-primary/20">
+                        <p className="text-xs text-center text-muted-foreground">
+                          <span className="font-bold text-primary">{game.totalRounds} rounds</span> played
+                          {' · '}
+                          <span className="text-primary/80">Click for full details</span>
+                        </p>
                       </div>
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">The Loser</p>
-                        <p className="text-sm font-bold truncate max-w-[150px] sm:max-w-xs">{game.loserName || "Unknown"}</p>
+                    )}
+                    <div className="p-3 rounded-xl bg-accent/30 border border-border flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <HugeiconsIcon icon={ChampionIcon} strokeWidth={2} className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {game.totalRounds > 1 ? "Worst Player" : "The Loser"}
+                          </p>
+                          <p className="text-sm font-bold truncate max-w-[150px] sm:max-w-xs">
+                            {game.totalRounds > 1 ? game.worstPlayerName || "Unknown" : game.loserName || "Unknown"}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-right hidden sm:block">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Duration</p>
-                      <p className="text-sm font-medium">
-                        {game.finishedAt
-                          ? `${Math.round((game.finishedAt - game._creationTime) / 60000)} mins`
-                          : 'N/A'
-                        }
-                      </p>
+                      <div className="text-right">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          {game.totalRounds > 1 ? "Total Shots" : "Duration"}
+                        </p>
+                        <p className="text-sm font-medium">
+                          {game.totalRounds > 1 
+                            ? game.worstPlayerShots 
+                            : (game.finishedAt ? `${Math.round((game.finishedAt - game._creationTime) / 60000)} mins` : 'N/A')
+                          }
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ) : (

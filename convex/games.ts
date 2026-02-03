@@ -27,11 +27,47 @@ export const getUserGames = query({
         .filter((q) => q.eq(q.field("gameId"), id))
         .collect()
 
-      const latestRound = await ctx.db
+      const allRounds = await ctx.db
         .query("rounds")
         .withIndex("by_game", (q) => q.eq("gameId", id))
-        .order("desc")
-        .first();
+        .collect();
+
+      const finishedRounds = allRounds.filter(r => r.status === "finished");
+      const latestRound = allRounds.sort((a, b) => b.roundNumber - a.roundNumber)[0];
+
+      // Get all votes for this game
+      const allVotes = await ctx.db
+        .query("votes")
+        .filter((q) => q.or(
+          ...allRounds.map(r => q.eq(q.field("roundId"), r._id))
+        ))
+        .collect()
+
+      // Calculate total shots per player across all rounds
+      const playerStats = players.map(player => {
+        let totalShots = 0;
+        finishedRounds.forEach(round => {
+          if (!round.loserId) return;
+
+          const roundVotes = allVotes.filter(v => v.roundId === round._id);
+          const isLoser = round.loserId === player._id;
+          const playerVote = roundVotes.find(v => v.voterId === player._id);
+          const votedForLoser = playerVote?.votedForId === round.loserId;
+
+          if (isLoser) {
+            // Loser drinks 1, or 2 if they voted for themselves
+            const selfVoted = playerVote?.votedForId === player._id;
+            totalShots += selfVoted ? 2 : 1;
+          } else if (votedForLoser) {
+            // Safe players who voted for the loser drink 1
+            totalShots += 1;
+          }
+        });
+        return { playerId: player._id, playerName: player.name, totalShots };
+      }).sort((a, b) => b.totalShots - a.totalShots);
+
+      // Find the overall worst player (most shots)
+      const worstPlayer = playerStats[0];
 
       let loserName = null;
       if (latestRound?.loserId) {
@@ -43,7 +79,10 @@ export const getUserGames = query({
         ...game,
         playerCount: players.length,
         loserName,
-        lastRoundNumber: latestRound?.roundNumber || 0
+        lastRoundNumber: latestRound?.roundNumber || 0,
+        totalRounds: finishedRounds.length,
+        worstPlayerName: worstPlayer?.playerName,
+        worstPlayerShots: worstPlayer?.totalShots || 0,
       };
     }));
 
