@@ -7,6 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "The ultimate Schocken companion app.",
     start_url: "/",
     display: "standalone",
+    orientation: "portrait",
     background_color: "#020617",
     theme_color: "#020617",
     icons: [

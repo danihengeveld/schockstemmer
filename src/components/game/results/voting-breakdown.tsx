@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import { Doc, Id } from "../../../../convex/_generated/dataModel"
+import { useTranslations } from "next-intl"
 
 interface VotingBreakdownProps {
   players: Doc<"players">[]
@@ -9,9 +10,11 @@ interface VotingBreakdownProps {
 }
 
 export function VotingBreakdown({ players, votes, loserId, loserVotedForSelf }: VotingBreakdownProps) {
+  const t = useTranslations("VotingBreakdown")
+
   return (
-    <div className="space-y-4 pt-8">
-      <h3 className="text-center text-xs font-bold uppercase text-muted-foreground tracking-widest">Full Voting Breakdown</h3>
+    <div className="space-y-3 sm:space-y-4 pt-4 sm:pt-8">
+      <h3 className="text-center text-xs font-bold uppercase text-muted-foreground tracking-widest">{t("title")}</h3>
       <div className="grid gap-3">
         {players.map(player => {
           const vote = votes.find(v => v.voterId === player._id)
@@ -21,22 +24,22 @@ export function VotingBreakdown({ players, votes, loserId, loserVotedForSelf }: 
           const shots = isLoser ? (loserVotedForSelf ? 2 : 1) : (isDrinkingBuddy ? 1 : 0)
 
           return (
-            <div key={player._id} className="flex justify-between items-center p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border shadow-sm text-sm transition-all hover:scale-[1.01]">
+              <div key={player._id} className="flex flex-wrap justify-between items-center p-3 sm:p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border shadow-sm text-sm transition-all gap-1">
               <div className="flex flex-col">
-                <span className="font-bold">{player.name}{player.hasLeft && <span className="text-muted-foreground font-normal ml-1">(Left)</span>}</span>
+                <span className="font-bold">{player.name}{player.hasLeft && <span className="text-muted-foreground font-normal ml-1">{t("left")}</span>}</span>
                 {shots > 0 && (
                   <span className="text-[10px] text-destructive font-black uppercase tracking-tighter">
-                    Take {shots} {shots === 1 ? 'shot' : 'shots'}
+                    {t("takeShots", { count: shots })}
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground font-medium text-right">
-                <span className="hidden sm:inline">voted for</span>
-                <span className="font-black text-foreground">{votedFor?.name || "Unknown"}</span>
+              <div className="flex items-center gap-1.5 sm:gap-2 text-muted-foreground font-medium text-right">
+                <span className="text-xs">→</span>
+                <span className="font-black text-foreground">{votedFor?.name || t("unknown")}</span>
                 {votedFor?._id === loserId ? (
-                  <Badge variant="destructive" className="ml-2 rounded-full text-[10px] font-black tracking-widest uppercase">Wrong</Badge>
+                  <Badge variant="destructive" className="ml-2 rounded-full text-[10px] font-black tracking-widest uppercase">{t("wrong")}</Badge>
                 ) : (
-                  <Badge variant="outline" className="ml-2 rounded-full text-[10px] font-black tracking-widest uppercase bg-green-500/10 text-green-600 border-green-200">Safe</Badge>
+                  <Badge variant="outline" className="ml-2 rounded-full text-[10px] font-black tracking-widest uppercase bg-green-500/10 text-green-600 border-green-200">{t("safe")}</Badge>
                 )}
               </div>
             </div>

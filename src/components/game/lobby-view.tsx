@@ -14,6 +14,7 @@ import {
   CheckmarkCircle02Icon
 } from "@hugeicons/core-free-icons"
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 
 interface LobbyViewProps {
   gameId: Id<"games">
@@ -24,6 +25,7 @@ interface LobbyViewProps {
 }
 
 export function LobbyView({ gameId, gameCode, players, isHost, currentPlayerId }: LobbyViewProps) {
+  const t = useTranslations("Lobby")
   const startGame = useMutation(api.games.startGame)
   const [copied, setCopied] = useState(false)
 
@@ -33,34 +35,34 @@ export function LobbyView({ gameId, gameCode, players, isHost, currentPlayerId }
 
   const handleShare = async () => {
     const url = window.location.href
-    const title = "Join my SchockStemmer game!"
-    const text = `Join my SchockStemmer game with code: ${gameCode}`
+    const title = t("shareTitle")
+    const text = t("shareText", { code: gameCode })
 
     if (navigator.share) {
       try {
         await navigator.share({ title, text, url })
-        toast.success("Shared successfully!")
+        toast.success(t("sharedSuccess"))
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
-          toast.error("Could not share")
+          toast.error(t("shareFailed"))
         }
       }
     } else {
       try {
         await navigator.clipboard.writeText(url)
         setCopied(true)
-        toast.success("Link copied to clipboard!")
+        toast.success(t("linkCopied"))
         setTimeout(() => setCopied(false), 2000)
       } catch {
-        toast.error("Could not copy link")
+        toast.error(t("copyFailed"))
       }
     }
   }
 
   const headerContent = (
     <div className="flex flex-col items-center gap-2">
-      <span className="text-sm uppercase tracking-widest text-muted-foreground font-semibold">Join Code</span>
-      <div className="text-5xl sm:text-6xl font-black tracking-tighter text-primary animate-in zoom-in duration-500">
+      <span className="text-sm uppercase tracking-widest text-muted-foreground font-semibold">{t("joinCode")}</span>
+      <div className="text-4xl sm:text-6xl font-black tracking-tighter text-primary animate-in zoom-in duration-500">
         {gameCode}
       </div>
     </div>
@@ -69,7 +71,7 @@ export function LobbyView({ gameId, gameCode, players, isHost, currentPlayerId }
   const title = (
     <div className="flex items-center justify-center gap-2 text-xl font-normal">
       <HugeiconsIcon icon={Loading03Icon} strokeWidth={2} className="w-5 h-5 animate-spin text-muted-foreground" />
-      Waiting for players...
+      {t("waitingForPlayers")}
     </div>
   )
 
@@ -78,13 +80,13 @@ export function LobbyView({ gameId, gameCode, players, isHost, currentPlayerId }
       <div className="space-y-4 text-left">
         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground px-1">
           <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} className="w-4 h-4" />
-          {players.length} Players Joined
+          {t("playersJoined", { count: players.length })}
         </div>
         <div className="grid grid-cols-1 gap-2">
           {players.filter(p => !p.hasLeft).map((player) => (
             <div
               key={player._id}
-              className="flex items-center gap-3 p-3 rounded-xl bg-background/50 border shadow-sm transition-all hover:scale-[1.02]"
+              className="flex items-center gap-3 p-3 rounded-xl bg-background/50 border shadow-sm transition-all active:scale-[0.98]"
             >
               <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
                 <AvatarFallback className="bg-primary/10 text-primary font-bold">
@@ -93,10 +95,10 @@ export function LobbyView({ gameId, gameCode, players, isHost, currentPlayerId }
               </Avatar>
               <div className="flex flex-col">
                 <span className="font-semibold">{player.name}</span>
-                {player.isHost && <span className="text-[10px] uppercase font-bold text-primary tracking-wide">Host</span>}
+                {player.isHost && <span className="text-[10px] uppercase font-bold text-primary tracking-wide">{t("host")}</span>}
               </div>
               {player._id === currentPlayerId && (
-                <span className="ml-auto text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">You</span>
+                <span className="ml-auto text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">{t("you")}</span>
               )}
             </div>
           ))}
@@ -110,11 +112,11 @@ export function LobbyView({ gameId, gameCode, players, isHost, currentPlayerId }
             size="lg"
             onClick={handleStartGame}
           >
-            Start Voting Phase
+            {t("startVoting")}
           </Button>
         ) : (
           <div className="text-center p-4 rounded-xl bg-secondary/50 text-muted-foreground text-sm animate-pulse">
-            Waiting for host to start...
+            {t("waitingForHost")}
           </div>
         )}
 
@@ -128,7 +130,7 @@ export function LobbyView({ gameId, gameCode, players, isHost, currentPlayerId }
           ) : (
             <HugeiconsIcon icon={Share01Icon} strokeWidth={2} className="w-4 h-4 mr-2" />
           )}
-          {copied ? "Copied!" : "Invite Friends"}
+          {copied ? t("copied") : t("inviteFriends")}
         </Button>
       </div>
     </GameCard>

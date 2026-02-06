@@ -15,6 +15,7 @@ import {
 import { useState } from "react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { AlertCircleIcon, DiceIcon } from "@hugeicons/core-free-icons"
+import { useTranslations } from "next-intl"
 
 interface PendingViewProps {
   roundId: Id<"rounds">
@@ -24,6 +25,7 @@ interface PendingViewProps {
 }
 
 export function PendingView({ roundId, players, isHost, currentPlayerId: currentUserId }: PendingViewProps) {
+  const t = useTranslations("Pending")
   const finishRound = useMutation(api.games.finishRound)
   const [selectedLoser, setSelectedLoser] = useState<Id<"players"> | null>(null)
 
@@ -44,28 +46,28 @@ export function PendingView({ roundId, players, isHost, currentPlayerId: current
 
   const headerContent = (
     <div className="flex justify-center pt-4 pb-2">
-      <div className="p-4 rounded-full bg-primary/10 text-primary shadow-sm animate-wiggle">
-        <HugeiconsIcon icon={DiceIcon} strokeWidth={2} className="w-10 h-10" />
+      <div className="p-3 sm:p-4 rounded-full bg-primary/10 text-primary shadow-sm animate-wiggle">
+        <HugeiconsIcon icon={DiceIcon} strokeWidth={2} className="w-8 h-8 sm:w-10 sm:h-10" />
       </div>
     </div>
   )
 
   return (
-    <GameCard headerContent={headerContent} title="Game In Progress">
+    <GameCard headerContent={headerContent} title={t("title")}>
       <p className="text-center text-muted-foreground text-sm -mt-2">
-        The dice are rolling... Wait for the game to finish.
+        {t("subtitle")}
       </p>
 
       {isHost ? (
         <div className="space-y-4 pt-2">
           <div className="text-left space-y-2">
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">
-              Who Lost?
+              {t("whoLost")}
             </label>
             <Select onValueChange={handleValueChange}>
               <SelectTrigger className="w-full h-12 text-lg">
                 <SelectValue>
-                  {selectedLoser ? players.find(p => p._id === selectedLoser)?.name : "Select the loser..."}
+                  {selectedLoser ? players.find(p => p._id === selectedLoser)?.name : t("selectLoser")}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -84,15 +86,15 @@ export function PendingView({ roundId, players, isHost, currentPlayerId: current
             disabled={!selectedLoser}
             onClick={handleFinishRound}
           >
-            Confirm Loser
+            {t("confirmLoser")}
           </Button>
         </div>
       ) : (
         <div className="flex flex-col items-center gap-2 p-5 rounded-xl bg-amber-500/5 border border-amber-500/20 text-amber-600 dark:text-amber-500">
           <HugeiconsIcon icon={AlertCircleIcon} strokeWidth={2} className="w-6 h-6 animate-pulse" />
-          <p className="font-semibold">Waiting for Host...</p>
+          <p className="font-semibold">{t("waitingForHost")}</p>
           <p className="text-xs opacity-80">
-            Hope you didn&apos;t vote for the loser!
+            {t("hopeMessage")}
           </p>
         </div>
       )}

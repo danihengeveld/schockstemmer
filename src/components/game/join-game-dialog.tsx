@@ -15,6 +15,7 @@ import { useState, useEffect } from "react"
 import { useUser } from "@clerk/nextjs"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { UserIcon } from "@hugeicons/core-free-icons"
+import { useTranslations } from "next-intl"
 
 interface JoinGameProps {
   gameCode?: string
@@ -22,6 +23,7 @@ interface JoinGameProps {
 }
 
 export function JoinGameDialog({ gameCode, onJoin }: JoinGameProps) {
+  const t = useTranslations("JoinGame")
   const [name, setName] = useState("")
   const [isJoining, setIsJoining] = useState(false)
   const { user, isSignedIn } = useUser()
@@ -48,30 +50,30 @@ export function JoinGameDialog({ gameCode, onJoin }: JoinGameProps) {
     <Dialog open={true}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Join Game</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>
-            Enter your name to join the game{gameCode ? ` (${gameCode})` : ""}.
+            {gameCode ? t("descriptionWithCode", { code: gameCode }) : t("description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <Field>
-            <FieldLabel>Display Name</FieldLabel>
+            <FieldLabel>{t("displayName")}</FieldLabel>
             <div className="relative">
               <HugeiconsIcon icon={UserIcon} strokeWidth={2} className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
               <Input
                 name="name" // Accessibility
-                placeholder="Your Name"
+                placeholder={t("placeholder")}
                 className="pl-9"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isJoining}
               />
             </div>
-            {!name && isJoining && <FieldError>Name is required</FieldError>}
+            {!name && isJoining && <FieldError>{t("nameRequired")}</FieldError>}
           </Field>
           <DialogFooter>
             <Button type="submit" disabled={!name || isJoining} className="rounded-full shadow-md transition-all px-8">
-              {isJoining ? "Joining..." : "Join Game"}
+              {isJoining ? t("joining") : t("joinGame")}
             </Button>
           </DialogFooter>
         </form>
