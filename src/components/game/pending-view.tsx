@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMutation } from "convex/react"
@@ -20,8 +19,8 @@ import { AlertCircleIcon, DiceIcon } from "@hugeicons/core-free-icons"
 interface PendingViewProps {
   roundId: Id<"rounds">
   players: Doc<"players">[]
-  isHost: boolean,
-  currentPlayerId: Id<"players"> | null
+  isHost: boolean
+  currentPlayerId: Id<"players">
 }
 
 export function PendingView({ roundId, players, isHost, currentPlayerId: currentUserId }: PendingViewProps) {
@@ -39,36 +38,26 @@ export function PendingView({ roundId, players, isHost, currentPlayerId: current
     }
   }
 
-  // Note: Select onChange returns string, so we need to cast or find.
   const handleValueChange = (val: string | null) => {
     setSelectedLoser(val as Id<"players">)
   }
 
   const headerContent = (
-    <>
-      <div className="flex justify-center mb-6 pt-4">
-        <div className="p-4 rounded-full bg-primary/10 text-primary shadow-sm animate-wiggle">
-          <HugeiconsIcon icon={DiceIcon} strokeWidth={2} className="w-10 h-10" />
-        </div>
+    <div className="flex justify-center pt-4 pb-2">
+      <div className="p-4 rounded-full bg-primary/10 text-primary shadow-sm animate-wiggle">
+        <HugeiconsIcon icon={DiceIcon} strokeWidth={2} className="w-10 h-10" />
       </div>
-    </>
+    </div>
   )
 
-  const title = "Game In Progress"
-
   return (
-    <GameCard headerContent={headerContent} title={title}>
-      <div className="text-center -mt-4 pb-4">
-        <p className="text-muted-foreground font-medium">The dice are rolling...</p>
-      </div>
-
-      <div className="p-4 rounded-xl bg-secondary/50 border border-secondary text-sm text-muted-foreground leading-relaxed">
-        <p><strong>Schocken is underway.</strong></p>
-        <p>Wait for the game to complete. The host will select the loser below.</p>
-      </div>
+    <GameCard headerContent={headerContent} title="Game In Progress">
+      <p className="text-center text-muted-foreground text-sm -mt-2">
+        The dice are rolling... Wait for the game to finish.
+      </p>
 
       {isHost ? (
-        <div className="space-y-4 pt-4">
+        <div className="space-y-4 pt-2">
           <div className="text-left space-y-2">
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">
               Who Lost?
@@ -80,7 +69,7 @@ export function PendingView({ roundId, players, isHost, currentPlayerId: current
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {players.map((player) => (
+                {players.filter(p => !p.hasLeft).map((player) => (
                   <SelectItem key={player._id} value={player._id} className="text-base">
                     {player.name}
                   </SelectItem>
@@ -99,7 +88,7 @@ export function PendingView({ roundId, players, isHost, currentPlayerId: current
           </Button>
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-3 p-6 rounded-xl bg-amber-500/5 border border-amber-500/20 text-amber-600 dark:text-amber-500">
+        <div className="flex flex-col items-center gap-2 p-5 rounded-xl bg-amber-500/5 border border-amber-500/20 text-amber-600 dark:text-amber-500">
           <HugeiconsIcon icon={AlertCircleIcon} strokeWidth={2} className="w-6 h-6 animate-pulse" />
           <p className="font-semibold">Waiting for Host...</p>
           <p className="text-xs opacity-80">

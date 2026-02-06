@@ -19,7 +19,7 @@ export function Header() {
   const params = useParams()
 
   const gameId = params?.gameId as Id<"games"> | undefined
-  const game = useQuery(api.games.getGameWithDetails, gameId ? { gameId } : "skip")?.game
+  const game = useQuery(api.games.getGame, gameId ? { gameId } : "skip")?.game
 
   const showInvite = !!gameId && game?.status !== "finished"
 

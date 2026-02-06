@@ -34,9 +34,9 @@ export function VotingBreakdown({ players, votes, loserId, loserVotedForSelf }: 
                 <span className="hidden sm:inline">voted for</span>
                 <span className="font-black text-foreground">{votedFor?.name || "Unknown"}</span>
                 {votedFor?._id === loserId ? (
-                  <Badge variant="destructive" className="ml-2 rounded-full text-[10px] font-black tracking-widest uppercase">INCORRECT</Badge>
+                  <Badge variant="destructive" className="ml-2 rounded-full text-[10px] font-black tracking-widest uppercase">Wrong</Badge>
                 ) : (
-                  <Badge variant="outline" className="ml-2 rounded-full text-[10px] font-black tracking-widest uppercase bg-green-500/10 text-green-600 border-green-200">SAFE</Badge>
+                  <Badge variant="outline" className="ml-2 rounded-full text-[10px] font-black tracking-widest uppercase bg-green-500/10 text-green-600 border-green-200">Safe</Badge>
                 )}
               </div>
             </div>

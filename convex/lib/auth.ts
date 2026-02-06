@@ -1,4 +1,5 @@
-import type { Id, MutationCtx } from "../_generated/dataModel"
+import type { Id } from "../_generated/dataModel"
+import type { MutationCtx } from "../_generated/server"
 
 /**
  * Verify that a player is the host and authorized to perform host actions.
