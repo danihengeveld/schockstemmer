@@ -10,7 +10,7 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Key01Icon } from "@hugeicons/core-free-icons"
+import { Key01Icon, Megaphone01Icon, FlashIcon, ChartHistogramIcon } from "@hugeicons/core-free-icons"
 
 export default function Home() {
   const router = useRouter()
@@ -27,7 +27,6 @@ export default function Home() {
       router.push(`/game/${gameId}`)
     } catch (error) {
       console.error("Failed to create game:", error)
-      // Ideally show toast here
     } finally {
       setIsCreating(false)
     }
@@ -58,78 +57,86 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col w-full max-w-5xl mx-auto px-4 py-8 space-y-12">
-      <div className="flex-1 flex flex-col items-center justify-center p-4 gap-12 w-full text-center">
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-          <div className="inline-block p-2 px-4 rounded-full bg-secondary/50 text-secondary-foreground text-sm font-medium mb-4">
-            The Ultimate Schocken Companion
-          </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-linear-to-r from-primary to-primary/60">
-            Who will NOT lose?
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Place your bets before the dice roll. The loser drinks, and so do their believers.
-            Track history, manage sessions, and see who has the worst intuition.
-          </p>
+    <div className="flex flex-col items-center gap-16 py-8 sm:py-16">
+      {/* Hero */}
+      <div className="flex flex-col items-center text-center gap-6 max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-1000">
+        <div className="inline-block px-4 py-1.5 rounded-full bg-secondary/50 text-secondary-foreground text-sm font-medium">
+          The Ultimate Schocken Companion
+        </div>
+        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-linear-to-r from-primary to-primary/60">
+          Who will NOT lose?
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-xl">
+          Place your bets before the dice roll. The loser drinks, and so do their believers.
+        </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            {isSignedIn ? (
-              <Button size="lg" className="h-14 px-8 text-lg rounded-full shadow-md hover:shadow-lg transition-all" onClick={handleCreateGame} disabled={isCreating}>
-                {isCreating ? "Creating..." : "Start New Game"}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 w-full max-w-lg">
+          {isSignedIn ? (
+            <Button size="lg" className="h-12 px-8 text-base rounded-full shadow-md hover:shadow-lg transition-all w-full sm:w-auto" onClick={handleCreateGame} disabled={isCreating}>
+              {isCreating ? "Creating..." : "Start New Game"}
+            </Button>
+          ) : (
+            <SignInButton mode="modal">
+              <Button size="lg" className="h-12 px-8 text-base rounded-full shadow-md hover:shadow-lg transition-all w-full sm:w-auto">
+                Login to Host
               </Button>
-            ) : (
-              <SignInButton mode="modal">
-                <Button size="lg" className="h-14 px-8 text-lg rounded-full shadow-md hover:shadow-lg transition-all">
-                  Login to Host
-                </Button>
-              </SignInButton>
-            )}
+            </SignInButton>
+          )}
 
-            <div className="relative flex items-center w-full sm:w-auto">
-              <HugeiconsIcon icon={Key01Icon} strokeWidth={2} className="absolute left-4 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
-              <Input
-                placeholder="Enter Game Code"
-                className="h-14 pl-10 border shadow-sm w-full sm:w-64 focus-visible:ring-primary rounded-full"
-                value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-              />
-              <Button size="sm" className="absolute right-2 top-2 bottom-2 h-auto rounded-full px-4" disabled={!joinCode || isJoining} onClick={handleJoinGame}>
-                {isJoining ? "..." : "Join"}
-              </Button>
-            </div>
-          </div>
+          <form onSubmit={handleJoinGame} className="relative flex items-center w-full sm:w-auto">
+            <HugeiconsIcon icon={Key01Icon} strokeWidth={2} className="absolute left-4 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
+            <Input
+              placeholder="Game Code"
+              className="h-12 pl-10 pr-20 border shadow-sm w-full sm:w-56 focus-visible:ring-primary rounded-full"
+              value={joinCode}
+              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+            />
+            <Button type="submit" size="sm" className="absolute right-1.5 rounded-full px-4 h-9" disabled={!joinCode || isJoining}>
+              {isJoining ? "..." : "Join"}
+            </Button>
+          </form>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full text-left">
-        <Card className="rounded-xl border-border bg-card/50 backdrop-blur-sm transition-all hover:border-primary/50 hover:shadow-md">
-          <CardHeader>
-            <CardTitle className="text-xl flex items-center gap-2">
-              <span className="text-2xl">🗳️</span> Vote
+      {/* Feature cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+        <Card className="rounded-xl border-border bg-card/50 backdrop-blur-sm transition-all hover:border-primary/30 hover:shadow-md">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <HugeiconsIcon icon={Megaphone01Icon} strokeWidth={2} className="h-4 w-4 text-primary" />
+              </div>
+              Vote
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-muted-foreground">
-            Pick a friend who you think is safe. If they lose, you drink with them.
+          <CardContent className="text-sm text-muted-foreground">
+            Pick who you think is safe. If they lose, you drink with them.
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-border bg-card/50 backdrop-blur-sm transition-all hover:border-primary/50 hover:shadow-md">
-          <CardHeader>
-            <CardTitle className="text-xl flex items-center gap-2">
-              <span className="text-2xl">⚡</span> Real-time
+        <Card className="rounded-xl border-border bg-card/50 backdrop-blur-sm transition-all hover:border-primary/30 hover:shadow-md">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <HugeiconsIcon icon={FlashIcon} strokeWidth={2} className="h-4 w-4 text-primary" />
+              </div>
+              Real-time
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-muted-foreground">
+          <CardContent className="text-sm text-muted-foreground">
             Live updates as players join and vote. Instant results reveal.
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-border bg-card/50 backdrop-blur-sm transition-all hover:border-primary/50 hover:shadow-md">
-          <CardHeader>
-            <CardTitle className="text-xl flex items-center gap-2">
-              <span className="text-2xl">📊</span> History
+        <Card className="rounded-xl border-border bg-card/50 backdrop-blur-sm transition-all hover:border-primary/30 hover:shadow-md">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <HugeiconsIcon icon={ChartHistogramIcon} strokeWidth={2} className="h-4 w-4 text-primary" />
+              </div>
+              History
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-muted-foreground">
-            Keep track of who loses the most and who is the worst at predicting.
+          <CardContent className="text-sm text-muted-foreground">
+            Track who loses the most and who is the worst at predicting.
           </CardContent>
         </Card>
       </div>

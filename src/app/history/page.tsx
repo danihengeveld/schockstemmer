@@ -28,20 +28,15 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="flex flex-col items-center w-full max-w-5xl mx-auto space-y-8 px-4 py-8">
+    <div className="flex flex-col items-center w-full space-y-8 py-4">
       <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-6">
         <div className="space-y-1">
-          <h1 className="text-4xl font-extrabold tracking-tight flex items-center gap-3">
-            <HugeiconsIcon icon={TransactionHistoryIcon} strokeWidth={2} className="h-8 w-8 text-primary" />
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight flex items-center gap-3">
+            <HugeiconsIcon icon={TransactionHistoryIcon} strokeWidth={2} className="h-7 w-7 text-primary" />
             Game History
           </h1>
           <p className="text-muted-foreground">Review your past games and see who had to pay.</p>
         </div>
-        <Link href="/">
-          <Button variant="outline" className="rounded-full shadow-sm hover:shadow-md transition-shadow">
-            Back to Home
-          </Button>
-        </Link>
       </div>
 
       {games.length === 0 ? (
@@ -64,8 +59,8 @@ export default function HistoryPage() {
       ) : (
         <div className="grid w-full gap-6">
           {games.map((game) => (
-            <Card key={game._id} className="group overflow-hidden border-border transition-all hover:border-primary/50 hover:shadow-lg bg-card/50 backdrop-blur-sm rounded-xl">
-              <div className="absolute top-0 left-0 w-1 bg-primary transform scale-y-0 group-hover:scale-y-100 transition-transform origin-top" />
+            <Card key={game._id} className="group overflow-hidden border-border transition-all hover:border-primary/50 hover:shadow-lg bg-card/50 backdrop-blur-sm rounded-xl relative">
+              <div className="absolute top-0 left-0 w-1 h-full bg-primary transform scale-y-0 group-hover:scale-y-100 transition-transform origin-top rounded-l-xl" />
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
@@ -88,9 +83,14 @@ export default function HistoryPage() {
                       <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} className="h-3 w-3" />
                       {game.playerCount} {game.playerCount === 1 ? 'Player' : 'Players'}
                     </span>
+                    {game.totalRounds > 0 && (
+                      <span className="flex items-center gap-1 text-primary font-semibold">
+                        {game.totalRounds} {game.totalRounds === 1 ? 'Round' : 'Rounds'}
+                      </span>
+                    )}
                   </div>
                 </div>
-                <Link href={`/game/${game._id}`}>
+                <Link href={`/history/${game._id}`}>
                   <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary hover:text-primary-foreground transition-colors">
                     <HugeiconsIcon icon={ArrowUpRight01Icon} strokeWidth={2} className="h-4 w-4" />
                   </Button>
@@ -98,24 +98,41 @@ export default function HistoryPage() {
               </CardHeader>
               <CardContent className="pb-4">
                 {game.status === "finished" ? (
-                  <div className="p-3 rounded-xl bg-accent/30 border border-border flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <HugeiconsIcon icon={ChampionIcon} strokeWidth={2} className="h-5 w-5 text-primary" />
+                  <div className="space-y-3">
+                    {game.totalRounds > 1 && (
+                      <div className="p-2 rounded-lg bg-primary/5 border border-primary/20">
+                        <p className="text-xs text-center text-muted-foreground">
+                          <span className="font-bold text-primary">{game.totalRounds} rounds</span> played
+                          {' · '}
+                          <span className="text-primary/80">View details for full breakdown</span>
+                        </p>
                       </div>
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">The Loser</p>
-                        <p className="text-sm font-bold truncate max-w-[150px] sm:max-w-xs">{game.loserName || "Unknown"}</p>
+                    )}
+                    <div className="p-3 rounded-xl bg-accent/30 border border-border flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <HugeiconsIcon icon={ChampionIcon} strokeWidth={2} className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {game.totalRounds > 1 ? "Worst Player" : "The Loser"}
+                          </p>
+                          <p className="text-sm font-bold truncate max-w-37.5 sm:max-w-xs">
+                            {game.totalRounds > 1 ? game.worstPlayerName || "Unknown" : game.loserName || "Unknown"}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-right hidden sm:block">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Duration</p>
-                      <p className="text-sm font-medium">
-                        {game.finishedAt
-                          ? `${Math.round((game.finishedAt - game._creationTime) / 60000)} mins`
-                          : 'N/A'
-                        }
-                      </p>
+                      <div className="text-right">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          {game.totalRounds > 1 ? "Total Shots" : "Duration"}
+                        </p>
+                        <p className="text-sm font-medium">
+                          {game.totalRounds > 1 
+                            ? game.worstPlayerShots 
+                            : (game.finishedAt ? `${Math.round((game.finishedAt - game._creationTime) / 60000)} mins` : 'N/A')
+                          }
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -124,12 +141,9 @@ export default function HistoryPage() {
                   </p>
                 )}
               </CardContent>
-              <CardFooter className="pt-2 pb-3 border-t bg-accent/5 flex justify-between items-center px-6">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold font-mono">
-                  {game.status === 'finished' ? 'Session Closed' : 'Active Session'}
-                </span>
-                <Link href={`/game/${game._id}`} className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 transition-all">
-                  View Game Details <HugeiconsIcon icon={ArrowUpRight01Icon} strokeWidth={2} className="h-3 w-3" />
+              <CardFooter className="pt-2 pb-3 border-t bg-accent/5 flex justify-end items-center px-6">
+                <Link href={`/history/${game._id}`} className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 transition-all">
+                  View Details <HugeiconsIcon icon={ArrowUpRight01Icon} strokeWidth={2} className="h-3 w-3" />
                 </Link>
               </CardFooter>
             </Card>

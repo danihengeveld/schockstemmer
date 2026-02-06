@@ -30,10 +30,10 @@ interface ResultsViewProps {
   players: Doc<"players">[]
   votes: Doc<"votes">[]
   loserId: Id<"players">
-  isHost?: boolean
+  isHost: boolean
   onLeave: () => void
   currentPlayerId: Id<"players">
-  gameStatus?: string
+  gameStatus: "active" | "finished"
 }
 
 export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, currentPlayerId, gameStatus }: ResultsViewProps) {
@@ -67,8 +67,12 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, 
         <div className="inline-flex items-center justify-center p-3 rounded-full bg-destructive/10 text-destructive mb-4 animate-bounce">
           <HugeiconsIcon icon={SkullIcon} strokeWidth={2} className="w-8 h-8" />
         </div>
-        <h1 className="text-4xl font-black tracking-tight underline decoration-destructive/30 underline-offset-8">ROUND OVER</h1>
-        <p className="text-muted-foreground text-lg">The results are in...</p>
+        <h1 className="text-4xl font-black tracking-tight underline decoration-destructive/30 underline-offset-8">
+          {gameStatus === "finished" ? "GAME OVER" : "ROUND OVER"}
+        </h1>
+        <p className="text-muted-foreground text-lg">
+          {gameStatus === "finished" ? "The final results are in..." : "The results are in..."}
+        </p>
       </div>
 
       <LoserCard
@@ -90,7 +94,7 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, 
       />
 
       <div className="flex flex-col gap-3 w-full max-w-sm mx-auto pt-8 pb-12">
-        {isHost && (
+        {isHost && gameStatus !== "finished" && (
           <>
             <Button
               size="lg"

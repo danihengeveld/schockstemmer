@@ -22,8 +22,15 @@ export default function GamePage() {
   const { user, isLoaded } = useUser()
   const router = useRouter()
 
-  // Fetch game data
-  const data = useQuery(api.games.getGameWithDetails, { gameId })
+  // Lightweight query — only current round votes
+  const data = useQuery(api.games.getGame, { gameId })
+
+  // Full history — only subscribed once rounds are finished
+  const hasFinishedRounds = data?.rounds?.some((r) => r.status === "finished")
+  const historyData = useQuery(
+    api.games.getGameHistory,
+    hasFinishedRounds ? { gameId } : "skip",
+  )
 
   // Mutations
   const joinGame = useMutation(api.games.joinGame)
@@ -35,10 +42,10 @@ export default function GamePage() {
   // Derived state
   const game = data?.game
   const gameStatus = game?.status
-  const players = data?.players || []
+  const players = data?.players ?? []
   const activeRound = data?.activeRound
-  const votes = data?.votes || []
-  const rounds = data?.rounds || []
+  const votes = data?.currentVotes ?? []
+  const rounds = data?.rounds ?? []
 
   const [localPlayerId, setLocalPlayerId] = useState<string | null>(null)
   const [hasCheckedStorage, setHasCheckedStorage] = useState(false)
@@ -73,7 +80,7 @@ export default function GamePage() {
 
   if (!data) {
     return (
-      <main className="min-h-screen bg-background p-4 flex flex-col items-center justify-center">
+      <div className="flex-1 flex items-center justify-center">
         <GameCard>
           <div className="space-y-4">
             <Skeleton className="h-12 w-3/4 mx-auto" />
@@ -86,7 +93,7 @@ export default function GamePage() {
             </div>
           </div>
         </GameCard>
-      </main>
+      </div>
     )
   }
 
@@ -169,22 +176,20 @@ export default function GamePage() {
       )}
 
       {gameStatus === "finished" && currentPlayer && (
-        <div className="flex flex-col items-center justify-center text-center space-y-4 w-full">
-          <h2 className="text-2xl font-bold">Game Session Ended</h2>
-          <ResultsView
-            gameId={gameId}
-            players={players}
-            votes={votes}
-            loserId={activeRound?.loserId!}
-            onLeave={handleLeave}
-            currentPlayerId={currentPlayer._id}
-            gameStatus={gameStatus}
-          />
-        </div>
+        <ResultsView
+          gameId={gameId}
+          players={players}
+          votes={votes}
+          loserId={activeRound?.loserId!}
+          isHost={isHost}
+          onLeave={handleLeave}
+          currentPlayerId={currentPlayer._id}
+          gameStatus={gameStatus}
+        />
       )}
 
       {/* Persistent History & Leaderboard */}
-      <RoundHistory rounds={rounds} players={players} allVotes={data?.allVotes || []} />
+      <RoundHistory rounds={rounds} players={players} allVotes={historyData?.allVotes ?? []} />
     </div>
   )
 }

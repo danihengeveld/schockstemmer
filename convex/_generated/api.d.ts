@@ -9,6 +9,8 @@
  */
 
 import type * as games from "../games.js";
+import type * as lib_auth from "../lib/auth.js";
+import type * as lib_helpers from "../lib/helpers.js";
 
 import type {
   ApiFromModules,
@@ -18,6 +20,8 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   games: typeof games;
+  "lib/auth": typeof lib_auth;
+  "lib/helpers": typeof lib_helpers;
 }>;
 
 /**
