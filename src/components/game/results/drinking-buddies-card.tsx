@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Doc } from "../../../../convex/_generated/dataModel"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { DrinkIcon } from "@hugeicons/core-free-icons"
+import { useTranslations } from "next-intl"
 
 interface DrinkingBuddiesCardProps {
   drinkingBuddies: Doc<"players">[]
@@ -10,6 +11,8 @@ interface DrinkingBuddiesCardProps {
 }
 
 export function DrinkingBuddiesCard({ drinkingBuddies, loser }: DrinkingBuddiesCardProps) {
+  const t = useTranslations("DrinkingBuddies")
+
   if (drinkingBuddies.length === 0) return null
 
   return (
@@ -17,10 +20,10 @@ export function DrinkingBuddiesCard({ drinkingBuddies, loser }: DrinkingBuddiesC
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg font-bold">
           <HugeiconsIcon icon={DrinkIcon} strokeWidth={2} className="w-5 h-5 text-amber-500" />
-          Drinking Buddies
+          {t("title")}
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          These people thought {loser?.name} was safe. 1 shot each!
+          {t("description", { name: loser?.name ?? "" })}
         </p>
       </CardHeader>
       <CardContent>

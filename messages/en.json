@@ -1,0 +1,192 @@
+{
+  "Metadata": {
+    "title": "SchockStemmer",
+    "description": "The ultimate Schocken companion app. Track your games, vote on losers, and avoid buying the round.",
+    "ogDescription": "The ultimate Schocken companion app. Place your bets, track your losses.",
+    "twitterDescription": "The ultimate Schocken companion app."
+  },
+  "HomePage": {
+    "badge": "The Ultimate Schocken Companion",
+    "title": "Who will NOT lose?",
+    "subtitle": "Place your bets before the dice roll. The loser drinks, and so do their believers.",
+    "creating": "Creating...",
+    "startNewGame": "Start New Game",
+    "loginToHost": "Login to Host",
+    "gameCodePlaceholder": "Game Code",
+    "join": "Join",
+    "joining": "...",
+    "gameNotFound": "Game not found! Please check the code.",
+    "joinFailed": "Failed to join game. Please try again.",
+    "voteTitle": "Vote",
+    "voteDescription": "Pick who you think is safe. If they lose, you drink with them.",
+    "realtimeTitle": "Real-time",
+    "realtimeDescription": "Live updates as players join and vote. Instant results reveal.",
+    "historyTitle": "History",
+    "historyDescription": "Track who loses the most and who is the worst at predicting."
+  },
+  "HistoryPage": {
+    "title": "Game History",
+    "subtitle": "Review your past games and see who had to pay.",
+    "noGamesTitle": "No games played yet",
+    "noGamesDescription": "Your game history is looking a bit empty. Start a new game and let the fun begin!",
+    "startGame": "Start a Game",
+    "gameTitle": "Game {code}",
+    "players": "{count, plural, one {# Player} other {# Players}}",
+    "rounds": "{count, plural, one {# Round} other {# Rounds}}",
+    "roundsPlayed": "{count, plural, one {# round} other {# rounds}} played",
+    "viewDetailsBreakdown": "View details for full breakdown",
+    "worstPlayer": "Worst Player",
+    "theLoser": "The Loser",
+    "totalShots": "Total Shots",
+    "duration": "Duration",
+    "unknown": "Unknown",
+    "na": "N/A",
+    "mins": "{count} mins",
+    "inProgress": "This game is currently in progress. Join back in to finish the showdown!",
+    "viewDetails": "View Details"
+  },
+  "HistoryDetail": {
+    "backToHistory": "Back to History",
+    "gameTitle": "Game {code}",
+    "min": "{count} min",
+    "players": "{count, plural, one {# Player} other {# Players}}",
+    "rounds": "{count, plural, one {# Round} other {# Rounds}}",
+    "biggestLoser": "Biggest Loser",
+    "theLoser": "The Loser",
+    "shotsTotal": "{count, plural, one {# shot} other {# shots}} total",
+    "lostRounds": "Lost {timesLost} of {totalRounds} rounds",
+    "hallOfShame": "Hall of Shame",
+    "shots": "Shots",
+    "worst": "Worst",
+    "left": "(Left)",
+    "acrossRounds": "Across {totalRounds} rounds · {playerCount} players",
+    "roundDetails": "Round Details",
+    "roundNumber": "Round {number}",
+    "shotCount": "{count, plural, one {# shot} other {# shots}}",
+    "selfVotePenalty": "Self-Vote Penalty ×2",
+    "drinkingBuddies": "Drinking Buddies",
+    "thoughtSafe": "Thought {name} was safe — 1 shot each!",
+    "votingBreakdown": "Voting Breakdown",
+    "wrong": "Wrong",
+    "safe": "Safe",
+    "noRoundsTitle": "No rounds completed",
+    "noRoundsDescription": "This game ended before any rounds were completed."
+  },
+  "Lobby": {
+    "joinCode": "Join Code",
+    "waitingForPlayers": "Waiting for players...",
+    "playersJoined": "{count} Players Joined",
+    "host": "Host",
+    "you": "You",
+    "startVoting": "Start Voting Phase",
+    "waitingForHost": "Waiting for host to start...",
+    "inviteFriends": "Invite Friends",
+    "copied": "Copied!",
+    "shareTitle": "Join my SchockStemmer game!",
+    "shareText": "Join my SchockStemmer game with code: {code}",
+    "sharedSuccess": "Shared successfully!",
+    "shareFailed": "Could not share",
+    "linkCopied": "Link copied to clipboard!",
+    "copyFailed": "Could not copy link"
+  },
+  "Voting": {
+    "title": "Place Your Bet",
+    "subtitle": "Who do you think will <bold>NOT</bold> lose?",
+    "you": "You",
+    "selfVoteWarning": "⚠️ Voting for yourself is risky — if you lose, you take 2 shots!",
+    "changeVote": "Change Vote",
+    "confirmVote": "Confirm Vote",
+    "waitingForOthers": "Waiting for other players..."
+  },
+  "Pending": {
+    "title": "Game In Progress",
+    "subtitle": "The dice are rolling... Wait for the game to finish.",
+    "whoLost": "Who Lost?",
+    "selectLoser": "Select the loser...",
+    "confirmLoser": "Confirm Loser",
+    "waitingForHost": "Waiting for Host...",
+    "hopeMessage": "Hope you didn't vote for the loser!"
+  },
+  "Results": {
+    "gameOver": "GAME OVER",
+    "roundOver": "ROUND OVER",
+    "finalResults": "The final results are in...",
+    "results": "The results are in...",
+    "nextRound": "Next Round",
+    "endSession": "End Session",
+    "endSessionTitle": "End Game Session?",
+    "endSessionDescription": "Are you sure you want to end this session? This will finish the game for all players and prevent any further rounds.",
+    "cancel": "Cancel",
+    "leaveGame": "Leave Game"
+  },
+  "LoserCard": {
+    "title": "The Loser",
+    "takeShots": "Has to take {count, plural, one {# shot} other {# shots}}!",
+    "selfVotePenalty": "Self-Vote Penalty x2"
+  },
+  "DrinkingBuddies": {
+    "title": "Drinking Buddies",
+    "description": "These people thought {name} was safe. 1 shot each!"
+  },
+  "VotingBreakdown": {
+    "title": "Full Voting Breakdown",
+    "takeShots": "Take {count, plural, one {# shot} other {# shots}}",
+    "votedFor": "voted for",
+    "unknown": "Unknown",
+    "wrong": "Wrong",
+    "safe": "Safe",
+    "left": "(Left)"
+  },
+  "RoundHistory": {
+    "sessionSummary": "Session Summary",
+    "hallOfShame": "Hall of Shame",
+    "shots": "Shots",
+    "worst": "Worst",
+    "left": "(Left)",
+    "roundHistory": "Round History",
+    "roundNumber": "Round {number}",
+    "shotCount": "{count, plural, one {# shot} other {# shots}}",
+    "selfVotePenalty": "Self-Vote Penalty ×2",
+    "drinkingBuddies": "Drinking Buddies",
+    "thoughtSafe": "Thought {name} was safe — 1 shot each!",
+    "votingBreakdown": "Voting Breakdown",
+    "wrong": "Wrong",
+    "safe": "Safe"
+  },
+  "Header": {
+    "invite": "Invite",
+    "history": "History",
+    "login": "Login",
+    "shareTitle": "Join my SchockStemmer game!",
+    "linkCopied": "Invite link copied!"
+  },
+  "Footer": {
+    "copyright": "© 2026 SchockStemmer",
+    "builtBy": "Built with ❤️ by",
+    "repository": "Repository"
+  },
+  "ModeToggle": {
+    "toggleTheme": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "JoinGame": {
+    "title": "Join Game",
+    "description": "Enter your name to join the game.",
+    "descriptionWithCode": "Enter your name to join the game ({code}).",
+    "displayName": "Display Name",
+    "placeholder": "Your Name",
+    "nameRequired": "Name is required",
+    "joining": "Joining...",
+    "joinGame": "Join Game"
+  },
+  "Loading": {
+    "text": "Loading SchockStemmer..."
+  },
+  "LanguageSwitcher": {
+    "switchLanguage": "Switch language",
+    "en": "English",
+    "nl": "Nederlands"
+  }
+}

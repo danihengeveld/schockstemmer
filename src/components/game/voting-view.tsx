@@ -11,6 +11,7 @@ import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons"
+import { useTranslations } from "next-intl"
 
 interface VotingViewProps {
   roundId: Id<"rounds">
@@ -21,6 +22,7 @@ interface VotingViewProps {
 }
 
 export function VotingView({ roundId, voterId, players, currentPlayerId, currentVote }: VotingViewProps) {
+  const t = useTranslations("Voting")
   const submitVote = useMutation(api.games.submitVote)
   const [selectedId, setSelectedId] = useState<Id<"players"> | undefined>(currentVote)
 
@@ -36,8 +38,8 @@ export function VotingView({ roundId, voterId, players, currentPlayerId, current
 
   const headerContent = (
     <div className="text-center space-y-2">
-      <h1 className="text-3xl font-bold tracking-tight">Place Your Bet</h1>
-      <p className="text-muted-foreground">Who do you think will <span className="font-semibold text-foreground">NOT</span> lose?</p>
+      <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+      <p className="text-muted-foreground">{t.rich("subtitle", { bold: (chunks) => <span className="font-semibold text-foreground">{chunks}</span> })}</p>
     </div>
   )
 
@@ -50,7 +52,7 @@ export function VotingView({ roundId, voterId, players, currentPlayerId, current
           return (
             <Card
               key={player._id}
-              className={`cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] rounded-xl bg-background/50 backdrop-blur-sm ${isSelected ? "border-primary ring-2 ring-primary/20 shadow-md" : "border-border"
+              className={`cursor-pointer transition-all active:scale-[0.98] rounded-xl bg-background/50 backdrop-blur-sm ${isSelected ? "border-primary ring-2 ring-primary/20 shadow-md" : "border-border"
                 }`}
               onClick={() => setSelectedId(player._id)}
             >
@@ -61,7 +63,7 @@ export function VotingView({ roundId, voterId, players, currentPlayerId, current
                   </AvatarFallback>
                 </Avatar>
                 <span className="text-base font-medium flex-1">{player.name}</span>
-                {isYou && <Badge variant="secondary" className="rounded-full text-[10px]">You</Badge>}
+                {isYou && <Badge variant="secondary" className="rounded-full text-[10px]">{t("you")}</Badge>}
                 {isSelected && (
                   <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} className="w-5 h-5 text-primary shrink-0" />
                 )}
@@ -73,7 +75,7 @@ export function VotingView({ roundId, voterId, players, currentPlayerId, current
 
       {selectedId === currentPlayerId && (
         <p className="text-center text-xs text-amber-600 dark:text-amber-400 font-medium">
-          ⚠️ Voting for yourself is risky — if you lose, you take 2 shots!
+          {t("selfVoteWarning")}
         </p>
       )}
 
@@ -83,12 +85,12 @@ export function VotingView({ roundId, voterId, players, currentPlayerId, current
         onClick={handleVote}
         disabled={!selectedId || selectedId === currentVote}
       >
-        {currentVote ? "Change Vote" : "Confirm Vote"}
+        {currentVote ? t("changeVote") : t("confirmVote")}
       </Button>
 
       {currentVote && (
         <p className="text-center text-sm text-muted-foreground animate-pulse">
-          Waiting for other players...
+          {t("waitingForOthers")}
         </p>
       )}
     </GameCard>

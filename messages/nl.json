@@ -1,0 +1,192 @@
+{
+  "Metadata": {
+    "title": "SchockStemmer",
+    "description": "Dé ultieme Schocken companion app. Houd je spelletjes bij, stem op verliezers en vermijd het rondje.",
+    "ogDescription": "Dé ultieme Schocken companion app. Plaats je weddenschappen, houd je verliezen bij.",
+    "twitterDescription": "Dé ultieme Schocken companion app."
+  },
+  "HomePage": {
+    "badge": "Dé Ultieme Schocken Companion",
+    "title": "Wie zal NIET verliezen?",
+    "subtitle": "Plaats je weddenschappen voordat de dobbelstenen rollen. De verliezer drinkt, en zijn believers ook.",
+    "creating": "Aanmaken...",
+    "startNewGame": "Nieuw Spel Starten",
+    "loginToHost": "Inloggen om te Hosten",
+    "gameCodePlaceholder": "Spelcode",
+    "join": "Meedoen",
+    "joining": "...",
+    "gameNotFound": "Spel niet gevonden! Controleer de code.",
+    "joinFailed": "Kan niet deelnemen aan het spel. Probeer het opnieuw.",
+    "voteTitle": "Stem",
+    "voteDescription": "Kies wie je denkt dat veilig is. Als diegene verliest, drink je mee.",
+    "realtimeTitle": "Realtime",
+    "realtimeDescription": "Live updates wanneer spelers deelnemen en stemmen. Directe onthulling van resultaten.",
+    "historyTitle": "Geschiedenis",
+    "historyDescription": "Houd bij wie het meest verliest en wie het slechtst voorspelt."
+  },
+  "HistoryPage": {
+    "title": "Spelgeschiedenis",
+    "subtitle": "Bekijk je eerdere spellen en zie wie moest betalen.",
+    "noGamesTitle": "Nog geen spellen gespeeld",
+    "noGamesDescription": "Je spelgeschiedenis is nog leeg. Start een nieuw spel en laat het feest beginnen!",
+    "startGame": "Start een Spel",
+    "gameTitle": "Spel {code}",
+    "players": "{count, plural, one {# Speler} other {# Spelers}}",
+    "rounds": "{count, plural, one {# Ronde} other {# Rondes}}",
+    "roundsPlayed": "{count, plural, one {# ronde} other {# rondes}} gespeeld",
+    "viewDetailsBreakdown": "Bekijk details voor volledig overzicht",
+    "worstPlayer": "Slechtste Speler",
+    "theLoser": "De Verliezer",
+    "totalShots": "Totaal Shots",
+    "duration": "Duur",
+    "unknown": "Onbekend",
+    "na": "N.v.t.",
+    "mins": "{count} min",
+    "inProgress": "Dit spel is momenteel bezig. Sluit je weer aan om de strijd af te ronden!",
+    "viewDetails": "Details Bekijken"
+  },
+  "HistoryDetail": {
+    "backToHistory": "Terug naar Geschiedenis",
+    "gameTitle": "Spel {code}",
+    "min": "{count} min",
+    "players": "{count, plural, one {# Speler} other {# Spelers}}",
+    "rounds": "{count, plural, one {# Ronde} other {# Rondes}}",
+    "biggestLoser": "Grootste Verliezer",
+    "theLoser": "De Verliezer",
+    "shotsTotal": "{count, plural, one {# shot} other {# shots}} totaal",
+    "lostRounds": "{timesLost} van {totalRounds} rondes verloren",
+    "hallOfShame": "Wall of Shame",
+    "shots": "Shots",
+    "worst": "Slechtste",
+    "left": "(Weg)",
+    "acrossRounds": "Over {totalRounds} rondes · {playerCount} spelers",
+    "roundDetails": "Ronde Details",
+    "roundNumber": "Ronde {number}",
+    "shotCount": "{count, plural, one {# shot} other {# shots}}",
+    "selfVotePenalty": "Eigen-stem Straf ×2",
+    "drinkingBuddies": "Meedrinkers",
+    "thoughtSafe": "Dacht dat {name} veilig was — 1 shot per persoon!",
+    "votingBreakdown": "Stemoverzicht",
+    "wrong": "Fout",
+    "safe": "Veilig",
+    "noRoundsTitle": "Geen rondes voltooid",
+    "noRoundsDescription": "Dit spel is geëindigd voordat er rondes werden voltooid."
+  },
+  "Lobby": {
+    "joinCode": "Deelnamecode",
+    "waitingForPlayers": "Wachten op spelers...",
+    "playersJoined": "{count} Spelers Aanwezig",
+    "host": "Host",
+    "you": "Jij",
+    "startVoting": "Start Stemfase",
+    "waitingForHost": "Wachten op de host om te starten...",
+    "inviteFriends": "Vrienden Uitnodigen",
+    "copied": "Gekopieerd!",
+    "shareTitle": "Doe mee met mijn SchockStemmer spel!",
+    "shareText": "Doe mee met mijn SchockStemmer spel met code: {code}",
+    "sharedSuccess": "Succesvol gedeeld!",
+    "shareFailed": "Kon niet delen",
+    "linkCopied": "Link gekopieerd naar klembord!",
+    "copyFailed": "Kon link niet kopiëren"
+  },
+  "Voting": {
+    "title": "Plaats Je Weddenschap",
+    "subtitle": "Wie denk je dat <bold>NIET</bold> zal verliezen?",
+    "you": "Jij",
+    "selfVoteWarning": "⚠️ Op jezelf stemmen is riskant — als je verliest, neem je 2 shots!",
+    "changeVote": "Stem Wijzigen",
+    "confirmVote": "Stem Bevestigen",
+    "waitingForOthers": "Wachten op andere spelers..."
+  },
+  "Pending": {
+    "title": "Spel Bezig",
+    "subtitle": "De dobbelstenen rollen... Wacht tot het spel is afgelopen.",
+    "whoLost": "Wie Heeft Verloren?",
+    "selectLoser": "Selecteer de verliezer...",
+    "confirmLoser": "Bevestig Verliezer",
+    "waitingForHost": "Wachten op Host...",
+    "hopeMessage": "Hopelijk heb je niet op de verliezer gestemd!"
+  },
+  "Results": {
+    "gameOver": "SPEL VOORBIJ",
+    "roundOver": "RONDE VOORBIJ",
+    "finalResults": "De eindresultaten zijn binnen...",
+    "results": "De resultaten zijn binnen...",
+    "nextRound": "Volgende Ronde",
+    "endSession": "Sessie Beëindigen",
+    "endSessionTitle": "Spelsessie Beëindigen?",
+    "endSessionDescription": "Weet je zeker dat je deze sessie wilt beëindigen? Dit beëindigt het spel voor alle spelers en voorkomt verdere rondes.",
+    "cancel": "Annuleren",
+    "leaveGame": "Spel Verlaten"
+  },
+  "LoserCard": {
+    "title": "De Verliezer",
+    "takeShots": "Moet {count, plural, one {# shot} other {# shots}} nemen!",
+    "selfVotePenalty": "Eigen-stem Straf x2"
+  },
+  "DrinkingBuddies": {
+    "title": "Meedrinkers",
+    "description": "Deze mensen dachten dat {name} veilig was. 1 shot per persoon!"
+  },
+  "VotingBreakdown": {
+    "title": "Volledig Stemoverzicht",
+    "takeShots": "Neem {count, plural, one {# shot} other {# shots}}",
+    "votedFor": "stemde op",
+    "unknown": "Onbekend",
+    "wrong": "Fout",
+    "safe": "Veilig",
+    "left": "(Weg)"
+  },
+  "RoundHistory": {
+    "sessionSummary": "Sessie Samenvatting",
+    "hallOfShame": "Wall of Shame",
+    "shots": "Shots",
+    "worst": "Slechtste",
+    "left": "(Weg)",
+    "roundHistory": "Ronde Geschiedenis",
+    "roundNumber": "Ronde {number}",
+    "shotCount": "{count, plural, one {# shot} other {# shots}}",
+    "selfVotePenalty": "Eigen-stem Straf ×2",
+    "drinkingBuddies": "Meedrinkers",
+    "thoughtSafe": "Dacht dat {name} veilig was — 1 shot per persoon!",
+    "votingBreakdown": "Stemoverzicht",
+    "wrong": "Fout",
+    "safe": "Veilig"
+  },
+  "Header": {
+    "invite": "Uitnodigen",
+    "history": "Geschiedenis",
+    "login": "Inloggen",
+    "shareTitle": "Doe mee met mijn SchockStemmer spel!",
+    "linkCopied": "Uitnodigingslink gekopieerd!"
+  },
+  "Footer": {
+    "copyright": "© 2026 SchockStemmer",
+    "builtBy": "Gebouwd met ❤️ door",
+    "repository": "Repository"
+  },
+  "ModeToggle": {
+    "toggleTheme": "Thema wisselen",
+    "light": "Licht",
+    "dark": "Donker",
+    "system": "Systeem"
+  },
+  "JoinGame": {
+    "title": "Deelnemen aan Spel",
+    "description": "Voer je naam in om deel te nemen aan het spel.",
+    "descriptionWithCode": "Voer je naam in om deel te nemen aan het spel ({code}).",
+    "displayName": "Weergavenaam",
+    "placeholder": "Je Naam",
+    "nameRequired": "Naam is verplicht",
+    "joining": "Deelnemen...",
+    "joinGame": "Deelnemen"
+  },
+  "Loading": {
+    "text": "SchockStemmer laden..."
+  },
+  "LanguageSwitcher": {
+    "switchLanguage": "Taal wisselen",
+    "en": "English",
+    "nl": "Nederlands"
+  }
+}

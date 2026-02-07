@@ -13,6 +13,7 @@ import { Doc } from "../../../convex/_generated/dataModel"
 import { calculatePlayerShots } from "../../../convex/lib/helpers"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ChampionIcon, DrinkIcon, SkullIcon, TransactionHistoryIcon } from "@hugeicons/core-free-icons"
+import { useTranslations } from "next-intl"
 
 interface RoundHistoryProps {
   rounds: Doc<"rounds">[]
@@ -21,6 +22,7 @@ interface RoundHistoryProps {
 }
 
 export function RoundHistory({ rounds, players, allVotes }: RoundHistoryProps) {
+  const t = useTranslations("RoundHistory")
   const finishedRounds = rounds.filter(r => r.status === "finished").sort((a, b) => b.roundNumber - a.roundNumber)
 
   // Calculate leaderboard (total shots) using shared helper
@@ -34,13 +36,13 @@ export function RoundHistory({ rounds, players, allVotes }: RoundHistoryProps) {
   if (rounds.length === 0) return null
 
   return (
-    <div className="w-full max-w-2xl mt-12 space-y-8 animate-in slide-in-from-bottom-4 duration-1000">
+    <div className="w-full max-w-2xl mt-8 sm:mt-12 space-y-6 sm:space-y-8 animate-in slide-in-from-bottom-4 duration-1000">
       <div className="relative">
         <div className="absolute inset-0 flex items-center" aria-hidden="true">
           <div className="w-full border-t border-border/50"></div>
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-background px-3 text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/50">Session Summary</span>
+          <span className="bg-background px-3 text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/50">{t("sessionSummary")}</span>
         </div>
       </div>
 
@@ -49,7 +51,7 @@ export function RoundHistory({ rounds, players, allVotes }: RoundHistoryProps) {
         <div className="space-y-4">
           <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-primary/80">
             <HugeiconsIcon icon={ChampionIcon} strokeWidth={2} className="w-4 h-4" />
-            Hall of Shame
+            {t("hallOfShame")}
           </h3>
           <div className="grid gap-2">
             {stats.map((player, index) => {
@@ -67,11 +69,11 @@ export function RoundHistory({ rounds, players, allVotes }: RoundHistoryProps) {
                     <div className="flex items-center justify-between">
                       <span className="font-bold truncate">
                         {player.name}
-                        {player.hasLeft && <span className="text-muted-foreground font-normal ml-2 text-[10px]">(Left)</span>}
+                        {player.hasLeft && <span className="text-muted-foreground font-normal ml-2 text-[10px]">{t("left")}</span>}
                       </span>
                       <div className="flex items-center gap-1.5 shrink-0 ml-2">
                         <span className="text-xl font-black text-foreground">{player.totalShots}</span>
-                        <span className="text-[10px] uppercase font-black text-muted-foreground tracking-tighter">Shots</span>
+                        <span className="text-[10px] uppercase font-black text-muted-foreground tracking-tighter">{t("shots")}</span>
                       </div>
                     </div>
                     <Progress value={percentage} className="h-1.5">
@@ -79,7 +81,7 @@ export function RoundHistory({ rounds, players, allVotes }: RoundHistoryProps) {
                   </div>
                   {index === 0 && player.totalShots > 0 && (
                     <Badge variant="destructive" className="rounded-full h-5 text-[8px] px-1.5 font-black uppercase tracking-tighter shrink-0">
-                      Worst
+                      {t("worst")}
                     </Badge>
                   )}
                 </div>
@@ -93,7 +95,7 @@ export function RoundHistory({ rounds, players, allVotes }: RoundHistoryProps) {
           <div className="space-y-4">
             <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-muted-foreground">
               <HugeiconsIcon icon={TransactionHistoryIcon} strokeWidth={2} className="w-4 h-4" />
-              Round History
+            {t("roundHistory")}
             </h3>
 
             <Accordion>
@@ -116,7 +118,7 @@ export function RoundHistory({ rounds, players, allVotes }: RoundHistoryProps) {
                         <div className="flex items-center justify-between w-full pr-2">
                           <div className="flex items-center gap-3">
                             <span className="text-xs font-black text-muted-foreground uppercase tracking-tighter">
-                              Round {round.roundNumber}
+                              {t("roundNumber", { number: round.roundNumber })}
                             </span>
                             {loser && (
                               <div className="flex items-center gap-1.5">
@@ -152,8 +154,8 @@ export function RoundHistory({ rounds, players, allVotes }: RoundHistoryProps) {
                             <div className="flex-1 min-w-0">
                               <p className="font-bold text-base truncate">{loser?.name}</p>
                               <p className="text-destructive text-xs font-bold uppercase tracking-widest">
-                                {loserShots} {loserShots === 1 ? "shot" : "shots"}
-                                {loserVotedForSelf && " · Self-Vote Penalty ×2"}
+                                {t("shotCount", { count: loserShots })}
+                                {loserVotedForSelf && ` · ${t("selfVotePenalty")}`}
                               </p>
                             </div>
                             <HugeiconsIcon icon={SkullIcon} strokeWidth={2} className="w-6 h-6 text-destructive/40 shrink-0" />
@@ -164,10 +166,10 @@ export function RoundHistory({ rounds, players, allVotes }: RoundHistoryProps) {
                             <div className="space-y-2">
                               <p className="text-xs font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
                                 <HugeiconsIcon icon={DrinkIcon} strokeWidth={2} className="w-3.5 h-3.5" />
-                                Drinking Buddies
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                Thought {loser?.name} was safe — 1 shot each!
+                              {t("drinkingBuddies")}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {t("thoughtSafe", { name: loser?.name ?? "" })}
                               </p>
                               <div className="flex flex-wrap gap-2">
                                 {drinkingBuddies.map(buddy => (
@@ -182,7 +184,7 @@ export function RoundHistory({ rounds, players, allVotes }: RoundHistoryProps) {
                           {/* Voting Breakdown */}
                           <div className="space-y-2">
                             <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                              Voting Breakdown
+                              {t("votingBreakdown")}
                             </p>
                             <div className="grid gap-1.5">
                               {players
@@ -209,20 +211,20 @@ export function RoundHistory({ rounds, players, allVotes }: RoundHistoryProps) {
                                         <span className="font-bold truncate">{player.name}</span>
                                         {shots > 0 && (
                                           <span className="text-[10px] text-destructive font-black uppercase tracking-tighter shrink-0">
-                                            {shots} {shots === 1 ? "shot" : "shots"}
+                                            {t("shotCount", { count: shots })}
                                           </span>
                                         )}
                                       </div>
-                                      <div className="flex items-center gap-2 shrink-0">
-                                        <span className="text-muted-foreground hidden sm:inline">→</span>
+                                      <div className="flex items-center gap-1.5 shrink-0">
+                                        <span className="text-muted-foreground text-xs">→</span>
                                         <span className="font-bold">{votedFor?.name}</span>
                                         {votedFor?._id === round.loserId ? (
                                           <Badge variant="destructive" className="rounded-full text-[9px] font-black tracking-widest uppercase px-1.5 h-4">
-                                            Wrong
+                                            {t("wrong")}
                                           </Badge>
                                         ) : (
                                           <Badge variant="outline" className="rounded-full text-[9px] font-black tracking-widest uppercase bg-green-500/10 text-green-600 border-green-200 px-1.5 h-4">
-                                            Safe
+                                            {t("safe")}
                                           </Badge>
                                         )}
                                       </div>

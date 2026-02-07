@@ -9,6 +9,9 @@ The ultimate Schocken companion app. Track your games, vote on losers, and avoid
 - **Drinking Budgets**: Automatic penalty calculation for incorrect votes and self-votes.
 - **Session History**: Track your past games and losses.
 - **Real-time Sync**: Built on Convex for instant updates across all devices.
+- **Dark Mode**: Stylish and easy on the eyes for late-night gaming (drinking) sessions.
+- **Mobile-First Design**: Optimized for mobile play.
+- **Multilingual Support**: Currently in English and Dutch, with more languages coming soon.
 
 ## 🛠️ Tech Stack
 

@@ -2,10 +2,10 @@
 
 import { useQuery } from "convex/react"
 import { useParams } from "next/navigation"
-import Link from "next/link"
-import { api } from "../../../../convex/_generated/api"
-import { Id, Doc } from "../../../../convex/_generated/dataModel"
-import { calculatePlayerShots } from "../../../../convex/lib/helpers"
+import { Link } from "@/i18n/navigation"
+import { api } from "../../../../../convex/_generated/api"
+import { Id, Doc } from "../../../../../convex/_generated/dataModel"
+import { calculatePlayerShots } from "../../../../../convex/lib/helpers"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -30,8 +30,10 @@ import {
   TransactionHistoryIcon,
   Clock01Icon,
 } from "@hugeicons/core-free-icons"
+import { useTranslations } from "next-intl"
 
 export default function HistoryDetailPage() {
+  const t = useTranslations("HistoryDetail")
   const params = useParams()
   const gameId = params.gameId as Id<"games">
   const data = useQuery(api.games.getGameHistory, { gameId })
@@ -83,7 +85,7 @@ export default function HistoryDetailPage() {
             className="rounded-full gap-1.5 text-muted-foreground hover:text-foreground"
           >
             <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} className="h-4 w-4" />
-            Back to History
+            {t("backToHistory")}
           </Button>
         </Link>
       </div>
@@ -93,8 +95,8 @@ export default function HistoryDetailPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                Game {game?.code}
+              <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
+                {t("gameTitle", { code: game?.code })}
               </h1>
               <Badge
                 variant={game?.status === "finished" ? "secondary" : "default"}
@@ -103,7 +105,7 @@ export default function HistoryDetailPage() {
                 {game?.status}
               </Badge>
             </div>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <HugeiconsIcon icon={Calendar03Icon} strokeWidth={2} className="h-3.5 w-3.5" />
                 {new Date(startTime).toLocaleDateString(undefined, {
@@ -115,15 +117,15 @@ export default function HistoryDetailPage() {
               </span>
               <span className="flex items-center gap-1.5">
                 <HugeiconsIcon icon={Clock01Icon} strokeWidth={2} className="h-3.5 w-3.5" />
-                {durationMins} min
+                {t("min", { count: durationMins })}
               </span>
               <span className="flex items-center gap-1.5">
                 <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} className="h-3.5 w-3.5" />
-                {players.length} {players.length === 1 ? "Player" : "Players"}
+                {t("players", { count: players.length })}
               </span>
               <span className="flex items-center gap-1.5 text-primary font-semibold">
                 <HugeiconsIcon icon={TransactionHistoryIcon} strokeWidth={2} className="h-3.5 w-3.5" />
-                {totalRounds} {totalRounds === 1 ? "Round" : "Rounds"}
+                {t("rounds", { count: totalRounds })}
               </span>
             </div>
           </div>
@@ -138,23 +140,23 @@ export default function HistoryDetailPage() {
           <div className="absolute inset-0 bg-destructive/5 pointer-events-none z-0" />
           <CardHeader className="text-center pb-2 relative z-10">
             <CardTitle className="text-lg uppercase tracking-widest text-destructive font-black">
-              {totalRounds > 1 ? "Biggest Loser" : "The Loser"}
+              {totalRounds > 1 ? t("biggestLoser") : t("theLoser")}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-4 py-6 relative z-10">
-            <Avatar className="h-24 w-24 border-4 border-destructive shadow-xl ring-4 ring-destructive/20">
-              <AvatarFallback className="bg-destructive text-destructive-foreground text-3xl font-black">
+            <Avatar className="h-20 w-20 sm:h-24 sm:w-24 border-4 border-destructive shadow-xl ring-4 ring-destructive/20">
+              <AvatarFallback className="bg-destructive text-destructive-foreground text-2xl sm:text-3xl font-black">
                 {worstPlayer.name.substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="text-center space-y-1">
-              <h2 className="text-3xl font-black tracking-tight">{worstPlayer.name}</h2>
+              <h2 className="text-2xl sm:text-3xl font-black tracking-tight">{worstPlayer.name}</h2>
               <p className="text-destructive font-bold text-sm uppercase tracking-widest">
-                {worstPlayer.totalShots} {worstPlayer.totalShots === 1 ? "shot" : "shots"} total
+                {t("shotsTotal", { count: worstPlayer.totalShots })}
               </p>
               {totalRounds > 1 && (
                 <p className="text-xs text-muted-foreground">
-                  Lost {worstPlayer.timesLost} of {totalRounds} rounds
+                  {t("lostRounds", { timesLost: worstPlayer.timesLost, totalRounds })}
                 </p>
               )}
             </div>
@@ -167,7 +169,7 @@ export default function HistoryDetailPage() {
         <div className="w-full space-y-4">
           <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-primary/80">
             <HugeiconsIcon icon={ChampionIcon} strokeWidth={2} className="w-4 h-4" />
-            Hall of Shame
+            {t("hallOfShame")}
           </h3>
           <div className="grid gap-2">
             {playerStats.map((player, index) => {
@@ -190,7 +192,7 @@ export default function HistoryDetailPage() {
                         {player.name}
                         {player.hasLeft && (
                           <span className="text-muted-foreground font-normal ml-2 text-[10px]">
-                            (Left)
+                            {t("left")}
                           </span>
                         )}
                       </span>
@@ -199,7 +201,7 @@ export default function HistoryDetailPage() {
                           {player.totalShots}
                         </span>
                         <span className="text-[10px] uppercase font-black text-muted-foreground tracking-tighter">
-                          Shots
+                          {t("shots")}
                         </span>
                       </div>
                     </div>
@@ -211,7 +213,7 @@ export default function HistoryDetailPage() {
                       variant="destructive"
                       className="rounded-full h-5 text-[8px] px-1.5 font-black uppercase tracking-tighter shrink-0"
                     >
-                      Worst
+                      {t("worst")}
                     </Badge>
                   )}
                 </div>
@@ -221,7 +223,7 @@ export default function HistoryDetailPage() {
           {totalRounds > 1 && (
             <div className="text-center">
               <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
-                Across {totalRounds} rounds · {players.length} players
+                {t("acrossRounds", { totalRounds, playerCount: players.length })}
               </p>
             </div>
           )}
@@ -235,7 +237,7 @@ export default function HistoryDetailPage() {
         <div className="w-full space-y-4">
           <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-muted-foreground">
             <HugeiconsIcon icon={TransactionHistoryIcon} strokeWidth={2} className="w-4 h-4" />
-            Round Details
+            {t("roundDetails")}
           </h3>
 
           <Accordion>
@@ -258,7 +260,7 @@ export default function HistoryDetailPage() {
                       <div className="flex items-center justify-between w-full pr-2">
                         <div className="flex items-center gap-3">
                           <span className="text-xs font-black text-muted-foreground uppercase tracking-tighter">
-                            Round {round.roundNumber}
+                            {t("roundNumber", { number: round.roundNumber })}
                           </span>
                           {loser && (
                             <div className="flex items-center gap-1.5">
@@ -308,8 +310,8 @@ export default function HistoryDetailPage() {
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-base truncate">{loser?.name}</p>
                             <p className="text-destructive text-xs font-bold uppercase tracking-widest">
-                              {loserShots} {loserShots === 1 ? "shot" : "shots"}
-                              {loserVotedForSelf && " · Self-Vote Penalty ×2"}
+                              {t("shotCount", { count: loserShots })}
+                              {loserVotedForSelf && ` · ${t("selfVotePenalty")}`}
                             </p>
                           </div>
                           <HugeiconsIcon
@@ -328,10 +330,10 @@ export default function HistoryDetailPage() {
                                 strokeWidth={2}
                                 className="w-3.5 h-3.5"
                               />
-                              Drinking Buddies
+                              {t("drinkingBuddies")}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              Thought {loser?.name} was safe — 1 shot each!
+                              {t("thoughtSafe", { name: loser?.name ?? "" })}
                             </p>
                             <div className="flex flex-wrap gap-2">
                               {drinkingBuddies.map((buddy) => (
@@ -350,7 +352,7 @@ export default function HistoryDetailPage() {
                         {/* Voting Breakdown */}
                         <div className="space-y-2">
                           <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                            Voting Breakdown
+                            {t("votingBreakdown")}
                           </p>
                           <div className="grid gap-1.5">
                             {players
@@ -386,7 +388,7 @@ export default function HistoryDetailPage() {
                                       </span>
                                       {shots > 0 && (
                                         <span className="text-[10px] text-destructive font-black uppercase tracking-tighter shrink-0">
-                                          {shots} {shots === 1 ? "shot" : "shots"}
+                                          {t("shotCount", { count: shots })}
                                         </span>
                                       )}
                                     </div>
@@ -400,14 +402,14 @@ export default function HistoryDetailPage() {
                                           variant="destructive"
                                           className="rounded-full text-[9px] font-black tracking-widest uppercase px-1.5 h-4"
                                         >
-                                          Wrong
+                                          {t("wrong")}
                                         </Badge>
                                       ) : (
                                         <Badge
                                           variant="outline"
                                           className="rounded-full text-[9px] font-black tracking-widest uppercase bg-green-500/10 text-green-600 border-green-200 px-1.5 h-4"
                                         >
-                                          Safe
+                                          {t("safe")}
                                         </Badge>
                                       )}
                                     </div>
@@ -438,9 +440,9 @@ export default function HistoryDetailPage() {
               />
             </div>
             <div className="space-y-2">
-              <CardTitle className="text-xl">No rounds completed</CardTitle>
+              <CardTitle className="text-xl">{t("noRoundsTitle")}</CardTitle>
               <p className="text-muted-foreground max-w-sm">
-                This game ended before any rounds were completed.
+                {t("noRoundsDescription")}
               </p>
             </div>
           </CardContent>

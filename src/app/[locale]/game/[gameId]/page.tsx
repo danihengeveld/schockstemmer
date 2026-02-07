@@ -10,11 +10,12 @@ import { VotingView } from "@/components/game/voting-view"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useUser } from "@clerk/nextjs"
 import { useMutation, useQuery } from "convex/react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { api } from "../../../../convex/_generated/api"
-import { Id } from "../../../../convex/_generated/dataModel"
+import { api } from "../../../../../convex/_generated/api"
+import { Id } from "../../../../../convex/_generated/dataModel"
 
 export default function GamePage() {
   const params = useParams()
@@ -118,7 +119,7 @@ export default function GamePage() {
       try {
         await leaveGame({ playerId: playerId as Id<"players"> })
         localStorage.removeItem(`schock_game_${gameId}`)
-      } catch (err) {
+      } catch {
         // Fallback for cleanup
         localStorage.removeItem(`schock_game_${gameId}`)
       }
@@ -132,7 +133,7 @@ export default function GamePage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center w-full py-4 sm:py-8">
+    <div className="flex-1 flex flex-col items-center justify-start sm:justify-center w-full py-2 sm:py-8">
       {game?.status === "lobby" && currentPlayer && (
         <LobbyView
           gameId={gameId}
