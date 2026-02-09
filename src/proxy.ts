@@ -8,10 +8,7 @@ const isProtectedRoute = createRouteMatcher(['/:locale/history(.*)', '/history(.
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
-    const authResult = await auth.protect()
-    if (authResult) {
-      return authResult
-    }
+    await auth.protect()
   }
   return handleI18nRouting(req)
 })
