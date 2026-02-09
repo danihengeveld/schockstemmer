@@ -12,6 +12,7 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { enUS, nlNL } from '@clerk/localizations'
 import "../globals.css";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
@@ -91,7 +92,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages();
 
   return (
-    <ClerkProvider appearance={{ theme: shadcn }}>
+    <ClerkProvider appearance={{ theme: shadcn }} localization={locale === 'nl' ? nlNL : enUS}>
       <html lang={locale} suppressHydrationWarning>
         <body className={`${inter.variable} antialiased min-h-svh bg-background flex flex-col`}>
           <NextIntlClientProvider locale={locale} messages={messages}>

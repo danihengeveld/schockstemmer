@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@base-ui/react": "1.1.0",
+    "@clerk/localizations": "3.35.3",
     "@clerk/nextjs": "6.37.3",
     "@clerk/themes": "2.4.51",
     "@hugeicons/core-free-icons": "3.1.1",
