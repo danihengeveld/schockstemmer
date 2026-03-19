@@ -38,6 +38,15 @@ export const joinGame = mutation({
     guestName: v.string(),
   },
   handler: async (ctx, { gameId, guestName }) => {
+    // ── Input validation ──────────────────────────────────────────────
+    const trimmed = guestName.trim()
+    if (trimmed.length === 0) {
+      return { success: false as const, error: "Name cannot be empty" }
+    }
+    if (trimmed.length > 50) {
+      return { success: false as const, error: "Name must be 50 characters or less" }
+    }
+
     const game = await ctx.db.get(gameId)
 
     if (!game) {
@@ -48,34 +57,46 @@ export const joinGame = mutation({
       return { success: false as const, error: "Game already started" }
     }
 
-    // Check for duplicate name
+    const identity = await ctx.auth.getUserIdentity()
+
+    // ── Authenticated user: rejoin by Clerk ID, not by name ───────────
+    if (identity?.subject) {
+      const existingAuth = await ctx.db
+        .query("players")
+        .withIndex("by_game_and_clerk", (q) =>
+          q.eq("gameId", gameId).eq("clerkId", identity.subject),
+        )
+        .first()
+
+      if (existingAuth) {
+        if (!existingAuth.hasLeft) {
+          return { success: false as const, error: "You already joined this game" }
+        }
+        // Reactivate their own record — identity is verified by Clerk JWT
+        await ctx.db.patch(existingAuth._id, { hasLeft: false })
+        return { success: true as const, playerId: existingAuth._id }
+      }
+    }
+
+    // ── Check for duplicate name ──────────────────────────────────────
     const existing = await ctx.db
       .query("players")
       .withIndex("by_game_and_name", (q) =>
-        q.eq("gameId", gameId).eq("name", guestName),
+        q.eq("gameId", gameId).eq("name", trimmed),
       )
       .first()
 
-    if (existing) {
-      if (!existing.hasLeft) {
-        return { success: false as const, error: "Name already taken" }
-      }
-
-      // Reactivate existing player who left
-      const identity = await ctx.auth.getUserIdentity()
-      await ctx.db.patch(existing._id, {
-        hasLeft: false,
-        clerkId: identity?.subject || existing.clerkId,
-      })
-
-      return { success: true as const, playerId: existing._id }
+    if (existing && !existing.hasLeft) {
+      return { success: false as const, error: "Name already taken" }
     }
+    // Note: if a name exists with hasLeft=true, we do NOT reactivate it.
+    // Guest players cannot prove they are the original owner. A new player
+    // record is created instead. This prevents name-based impersonation.
 
-    // Create new player
-    const identity = await ctx.auth.getUserIdentity()
+    // ── Create new player ─────────────────────────────────────────────
     const playerId = await ctx.db.insert("players", {
       gameId,
-      name: guestName,
+      name: trimmed,
       isHost: false,
       clerkId: identity?.subject,
     })
@@ -96,13 +117,20 @@ export const leaveGame = mutation({
     const { gameId } = player
 
     if (player.isHost) {
+      // Find next host candidate — exclude the leaving player at query level
+      // to avoid race conditions where the leaving player appears in the list
       const activePlayers = await ctx.db
         .query("players")
         .withIndex("by_game", (q) => q.eq("gameId", gameId))
-        .filter((q) => q.neq(q.field("hasLeft"), true))
+        .filter((q) =>
+          q.and(
+            q.neq(q.field("hasLeft"), true),
+            q.neq(q.field("_id"), playerId),
+          ),
+        )
         .collect()
 
-      const newHost = activePlayers.find((p) => p._id !== playerId)
+      const newHost = activePlayers[0]
 
       if (newHost) {
         await ctx.db.patch(newHost._id, { isHost: true })
@@ -279,6 +307,11 @@ export const submitVote = mutation({
 export const getGameByCode = query({
   args: { code: v.string() },
   handler: async (ctx, { code }) => {
+    // Validate format before hitting the database — reject obviously invalid codes
+    if (!/^[A-Z2-9]{6}$/.test(code)) {
+      return null
+    }
+
     return await ctx.db
       .query("games")
       .withIndex("by_code", (q) => q.eq("code", code))
@@ -332,12 +365,37 @@ export const getGame = query({
 /**
  * Full game details including all votes across all rounds.
  * Used for the history detail page and the in-game round history panel.
+ *
+ * Authorization: the caller must be either
+ *  - an authenticated user who participated in this game, OR
+ *  - requesting a game that is NOT finished (active game access for guests)
+ *
+ * This prevents unauthenticated enumeration of finished game history,
+ * while still allowing guest players to see round history during play.
  */
 export const getGameHistory = query({
   args: { gameId: v.id("games") },
   handler: async (ctx, { gameId }) => {
     const game = await ctx.db.get(gameId)
     if (!game) return null
+
+    const identity = await ctx.auth.getUserIdentity()
+
+    // For finished games, require the caller to be an authenticated participant
+    if (game.status === "finished") {
+      if (!identity?.subject) {
+        return null
+      }
+      const participant = await ctx.db
+        .query("players")
+        .withIndex("by_game_and_clerk", (q) =>
+          q.eq("gameId", gameId).eq("clerkId", identity.subject),
+        )
+        .first()
+      if (!participant) {
+        return null
+      }
+    }
 
     const players = await ctx.db
       .query("players")
@@ -379,7 +437,7 @@ export const getUserGames = query({
 
     const playerRecords = await ctx.db
       .query("players")
-      .filter((q) => q.eq(q.field("clerkId"), identity.subject))
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
       .collect()
 
     if (playerRecords.length === 0) return []
