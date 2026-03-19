@@ -101,6 +101,9 @@ export default function GamePage() {
   }
 
   const handleLeave = async () => {
+    // Prefer currentPlayer (Convex-verified), fall back to localStorage value.
+    // The cast is safe: the value originates from Convex on join and is
+    // re-validated server-side by verifyPlayerIdentity in the mutation.
     const playerId = currentPlayer?._id ?? localPlayerId
     if (playerId) {
       try {

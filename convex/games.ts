@@ -90,6 +90,7 @@ export const leaveGame = mutation({
   },
   handler: async (ctx, { playerId }) => {
     const player = await verifyPlayerIdentity(ctx, playerId)
+    // Idempotent: double-leave (e.g. from network retry) is a no-op
     if (player.hasLeft) return
 
     const { gameId } = player
