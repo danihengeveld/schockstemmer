@@ -8,11 +8,12 @@ import { ResultsView } from "@/components/game/results-view"
 import { RoundHistory } from "@/components/game/round-history"
 import { VotingView } from "@/components/game/voting-view"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useLocalStorage } from "@/hooks/use-local-storage"
 import { useUser } from "@clerk/nextjs"
 import { useMutation, useQuery } from "convex/react"
 import { useParams } from "next/navigation"
 import { useRouter } from "@/i18n/navigation"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { toast } from "sonner"
 import { api } from "../../../../../convex/_generated/api"
 import { Id } from "../../../../../convex/_generated/dataModel"
@@ -37,9 +38,6 @@ export default function GamePage() {
   const joinGame = useMutation(api.games.joinGame)
   const leaveGame = useMutation(api.games.leaveGame)
 
-  // Local state
-  const [showJoinDialog, setShowJoinDialog] = useState(false)
-
   // Derived state
   const game = data?.game
   const gameStatus = game?.status
@@ -48,14 +46,8 @@ export default function GamePage() {
   const votes = data?.currentVotes ?? []
   const rounds = data?.rounds ?? []
 
-  const [localPlayerId, setLocalPlayerId] = useState<string | null>(null)
-  const [hasCheckedStorage, setHasCheckedStorage] = useState(false)
-
-  useEffect(() => {
-    const stored = localStorage.getItem(`schock_game_${gameId}`)
-    if (stored) setLocalPlayerId(stored)
-    setHasCheckedStorage(true)
-  }, [gameId])
+  // Player identity — useSyncExternalStore avoids setState-in-effect
+  const [localPlayerId, setLocalPlayerId] = useLocalStorage(`schock_game_${gameId}`)
 
   const currentPlayer = players.find(p =>
     ((user && p.clerkId === user.id) ||
@@ -63,21 +55,17 @@ export default function GamePage() {
     !p.hasLeft
   )
 
-  if (currentPlayer) {
-    localStorage.setItem(`schock_game_${gameId}`, currentPlayer._id)
-  }
+  // Keep localStorage in sync when player is identified via Clerk
+  useEffect(() => {
+    if (currentPlayer && currentPlayer._id !== localPlayerId) {
+      setLocalPlayerId(currentPlayer._id)
+    }
+  }, [currentPlayer, localPlayerId, setLocalPlayerId])
 
   const isHost = currentPlayer?.isHost ?? false
 
-  // Join Dialog Management
-  useEffect(() => {
-    // Only show dialog if we have loaded data, checked storage, and still found no player
-    if (data && isLoaded && hasCheckedStorage && !currentPlayer) {
-      setShowJoinDialog(true)
-    } else {
-      setShowJoinDialog(false)
-    }
-  }, [data, currentPlayer, isLoaded, hasCheckedStorage])
+  // Derived: show join dialog when data is loaded but no player found
+  const showJoinDialog = !!(data && isLoaded && !currentPlayer)
 
   if (!data) {
     return (
@@ -106,7 +94,6 @@ export default function GamePage() {
     })
 
     if (result.success && result.playerId) {
-      localStorage.setItem(`schock_game_${gameId}`, result.playerId)
       setLocalPlayerId(result.playerId)
     } else if (!result.success) {
       toast.error(result.error)
@@ -114,15 +101,14 @@ export default function GamePage() {
   }
 
   const handleLeave = async () => {
-    const playerId = currentPlayer?._id || localPlayerId
+    const playerId = currentPlayer?._id ?? localPlayerId
     if (playerId) {
       try {
         await leaveGame({ playerId: playerId as Id<"players"> })
-        localStorage.removeItem(`schock_game_${gameId}`)
       } catch {
-        // Fallback for cleanup
-        localStorage.removeItem(`schock_game_${gameId}`)
+        // Ignore — player may already have left
       }
+      setLocalPlayerId(null)
     }
     router.push('/')
   }
@@ -163,12 +149,12 @@ export default function GamePage() {
         />
       )}
 
-      {gameStatus === "active" && activeRound?.status === "finished" && currentPlayer && (
+      {gameStatus === "active" && activeRound?.status === "finished" && activeRound.loserId && currentPlayer && (
         <ResultsView
           gameId={gameId}
           players={players}
           votes={votes}
-          loserId={activeRound.loserId!}
+          loserId={activeRound.loserId}
           isHost={isHost}
           onLeave={handleLeave}
           currentPlayerId={currentPlayer._id}
@@ -176,12 +162,12 @@ export default function GamePage() {
         />
       )}
 
-      {gameStatus === "finished" && currentPlayer && (
+      {gameStatus === "finished" && activeRound?.loserId && currentPlayer && (
         <ResultsView
           gameId={gameId}
           players={players}
           votes={votes}
-          loserId={activeRound?.loserId!}
+          loserId={activeRound.loserId}
           isHost={isHost}
           onLeave={handleLeave}
           currentPlayerId={currentPlayer._id}

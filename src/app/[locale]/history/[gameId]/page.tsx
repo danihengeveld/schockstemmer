@@ -51,7 +51,6 @@ export default function HistoryDetailPage() {
   }
 
   const { game, players, rounds, allVotes } = data
-  const activePlayers = players.filter((p) => !p.hasLeft)
   const finishedRounds = rounds
     .filter((r) => r.status === "finished")
     .sort((a, b) => a.roundNumber - b.roundNumber)
@@ -69,10 +68,11 @@ export default function HistoryDetailPage() {
   const maxShots = Math.max(...playerStats.map((p) => p.totalShots), 1)
   const worstPlayer = playerStats.length > 0 && playerStats[0].totalShots > 0 ? playerStats[0] : null
 
-  // Duration
+  // Duration — only compute for finished games (Date.now() is impure in render)
   const startTime = game?._creationTime ?? 0
-  const endTime = game?.finishedAt ?? Date.now()
-  const durationMins = Math.round((endTime - startTime) / 60000)
+  const durationMins = game?.finishedAt
+    ? Math.round((game.finishedAt - startTime) / 60000)
+    : null
 
   return (
     <div className="flex flex-col items-center w-full max-w-3xl mx-auto space-y-8 py-4">
@@ -115,10 +115,12 @@ export default function HistoryDetailPage() {
                   day: "numeric",
                 })}
               </span>
-              <span className="flex items-center gap-1.5">
-                <HugeiconsIcon icon={Clock01Icon} strokeWidth={2} className="h-3.5 w-3.5" />
-                {t("min", { count: durationMins })}
-              </span>
+              {durationMins !== null && (
+                <span className="flex items-center gap-1.5">
+                  <HugeiconsIcon icon={Clock01Icon} strokeWidth={2} className="h-3.5 w-3.5" />
+                  {t("min", { count: durationMins })}
+                </span>
+              )}
               <span className="flex items-center gap-1.5">
                 <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} className="h-3.5 w-3.5" />
                 {t("players", { count: players.length })}
