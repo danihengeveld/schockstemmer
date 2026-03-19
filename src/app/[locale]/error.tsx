@@ -10,6 +10,10 @@ export default function Error({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  // Required by Next.js error boundary signature; intentionally unused
+  // to avoid leaking internal details to end users.
+  void error
+
   return (
     <div className="flex flex-1 items-center justify-center min-h-[60vh]">
       <Card className="w-full max-w-md rounded-xl">
@@ -20,7 +24,7 @@ export default function Error({
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4">
           <p className="text-muted-foreground text-center text-sm">
-            {error.message || "An unexpected error occurred."}
+            An unexpected error occurred. Please try again.
           </p>
           <Button onClick={reset} className="rounded-full px-8">
             Try again
