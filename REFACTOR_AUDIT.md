@@ -85,6 +85,18 @@ Full re-audit of every Convex query/mutation, middleware path, and server/client
 | **Used `by_clerkId` index in `getUserGames`** | Switches from `.filter()` to `.withIndex("by_clerkId", ...)` for the player lookup. | None — same results, better performance. |
 | **Hardened `leaveGame` host reassignment** | Previously found the next host with `.find((p) => p._id !== playerId)` after a separate filter — if the leaving player appeared in the list due to a timing issue, they could become the new host. Now excludes the leaving player directly in the Convex filter query (using `q.and()`), and uses `activePlayers[0]` deterministically. | None — same logic, more robust. |
 
+### Batch 5: Maintainability Pass — Reduce Duplication, Remove Dead Code
+
+| Change | Why | Risk |
+|--------|-----|------|
+| **Extracted `deriveRoundResult()` helper** | The loser/drinkingBuddies/shots derivation pattern was copy-pasted across `results-view.tsx`, `round-history.tsx`, `voting-breakdown.tsx`, and `history/[gameId]/page.tsx` (4 copies). Now a single function in `convex/lib/helpers.ts` handles this. | None — pure function, same output, unit-testable. |
+| **Extracted `<Leaderboard>` component** | The "Hall of Shame" leaderboard (ranked players with progress bars, worst badge) was duplicated between `round-history.tsx` and `history/[gameId]/page.tsx`. Now a single component in `src/components/game/leaderboard.tsx`. | None — identical JSX, now shared. |
+| **Extracted `<RoundDetailAccordion>` component** | The round-by-round accordion (loser card, drinking buddies, full voting breakdown) was duplicated between `round-history.tsx` and `history/[gameId]/page.tsx`. Now a single component in `src/components/game/round-detail-accordion.tsx`. Accepts an optional `heading` prop for the section title. | None — identical rendering logic, now shared. |
+| **Consolidated translation keys into `GameSummary` namespace** | The shared leaderboard/accordion keys (`hallOfShame`, `shots`, `worst`, `roundNumber`, `shotCount`, etc.) were duplicated in both `RoundHistory` and `HistoryDetail` namespaces with identical values. Now a single `GameSummary` namespace used by both shared components. Original namespaces keep only their unique keys. | None — same translations shown to users. |
+| **Simplified `round-history.tsx`** | Rewrote from 248 lines to ~40 lines by composing `<Leaderboard>` + `<RoundDetailAccordion>`. | None — same output. |
+| **Simplified `history/[gameId]/page.tsx`** | Rewrote from 456 lines to ~190 lines by composing shared components. Removed 15 unused imports. | None — same output. |
+| **Removed unused `textarea.tsx`** | Confirmed zero imports anywhere in the codebase. | None — dead code. |
+
 ---
 
 ## Current State After Refactor
@@ -136,7 +148,6 @@ Full re-audit of every Convex query/mutation, middleware path, and server/client
 ### Low-Priority Polish
 
 - Footer uses `next/link` for external links instead of plain `<a>` (works but `next/link` is intended for internal navigation)
-- Some UI components from Shadcn may be unused (e.g., `textarea.tsx`) — no harm in keeping them
 - The `loading.tsx` file uses `"use client"` + `useTranslations` — this is fine but means the loading UI requires client JS to render
 - `convex/auth.config.ts` uses `process.env.CLERK_JWT_ISSUER_DOMAIN!` non-null assertion — this runs in Convex server environment where the env var is expected to be set, so it's acceptable
 
@@ -153,6 +164,7 @@ Full re-audit of every Convex query/mutation, middleware path, and server/client
 | Error handling | `src/app/[locale]/error.tsx` | Graceful error boundary |
 | TypeScript | `src/types/next-env.d.ts` | Fixed pre-existing TS2307 error |
 | Developer experience | `.env.example`, `.gitignore` | Environment variable documentation |
+| Maintainability pass | `convex/lib/helpers.ts`, `src/components/game/*`, `src/app/[locale]/history/[gameId]/page.tsx`, `messages/*.json` | Eliminated duplication, extracted shared components, removed dead code |
 | Documentation | `REFACTOR_AUDIT.md` | This audit document |
 
 ### No Breaking Changes
@@ -162,3 +174,4 @@ All changes are additive or strictly tightening. Existing behavior is preserved 
 - A guest who left and tries to rejoin with the same name will get a new player record instead of resuming the old one
 - Unauthenticated callers can no longer read finished game history via direct Convex query calls
 - The history detail page no longer shows a duration for in-progress games (previously showed a stale estimate)
+- Translation key organization changed (internal, invisible to users)

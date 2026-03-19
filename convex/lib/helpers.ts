@@ -65,14 +65,24 @@ export function deriveRoundResult(
   return { loser, loserVotedForSelf, loserShots, drinkingBuddies }
 }
 
+// ─── Game code ────────────────────────────────────────────────────────────────
+
+/** Characters used in game codes (no ambiguous 0/O, 1/I/L). */
+const GAME_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+const GAME_CODE_LENGTH = 6
+
+/** Regex that matches a valid game code. Used for input validation. */
+export const GAME_CODE_REGEX = new RegExp(
+  `^[${GAME_CODE_CHARS}]{${GAME_CODE_LENGTH}}$`,
+)
+
 /**
  * Generate a random 6-character game code.
  */
 export function generateGameCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
   let code = ""
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length))
+  for (let i = 0; i < GAME_CODE_LENGTH; i++) {
+    code += GAME_CODE_CHARS.charAt(Math.floor(Math.random() * GAME_CODE_CHARS.length))
   }
   return code
 }

@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
 import { verifyHostAuthorization, verifyPlayerIdentity } from "./lib/auth"
-import { calculatePlayerShots, generateGameCode } from "./lib/helpers"
+import { calculatePlayerShots, generateGameCode, GAME_CODE_REGEX } from "./lib/helpers"
 
 // ─── Mutations ───────────────────────────────────────────────────────────────
 
@@ -312,7 +312,7 @@ export const getGameByCode = query({
   args: { code: v.string() },
   handler: async (ctx, { code }) => {
     // Validate format before hitting the database — reject obviously invalid codes
-    if (!/^[A-Z2-9]{6}$/.test(code)) {
+    if (!GAME_CODE_REGEX.test(code)) {
       return null
     }
 
