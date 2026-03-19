@@ -1,6 +1,6 @@
 import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
-import { verifyHostAuthorization } from "./lib/auth"
+import { verifyHostAuthorization, verifyPlayerIdentity } from "./lib/auth"
 import { calculatePlayerShots, generateGameCode } from "./lib/helpers"
 
 // ─── Mutations ───────────────────────────────────────────────────────────────
@@ -89,8 +89,8 @@ export const leaveGame = mutation({
     playerId: v.id("players"),
   },
   handler: async (ctx, { playerId }) => {
-    const player = await ctx.db.get(playerId)
-    if (!player) return
+    const player = await verifyPlayerIdentity(ctx, playerId)
+    if (player.hasLeft) return
 
     const { gameId } = player
 
@@ -128,6 +128,11 @@ export const startGame = mutation({
   handler: async (ctx, { gameId, playerId }) => {
     await verifyHostAuthorization(ctx, playerId, gameId)
 
+    const game = await ctx.db.get(gameId)
+    if (!game || game.status !== "lobby") {
+      throw new Error("Game is not in lobby")
+    }
+
     await ctx.db.patch(gameId, { status: "active" })
 
     await ctx.db.insert("rounds", {
@@ -146,6 +151,11 @@ export const finishGame = mutation({
   handler: async (ctx, { gameId, playerId }) => {
     await verifyHostAuthorization(ctx, playerId, gameId)
 
+    const game = await ctx.db.get(gameId)
+    if (!game || game.status === "finished") {
+      throw new Error("Game is already finished or not found")
+    }
+
     await ctx.db.patch(gameId, {
       status: "finished",
       finishedAt: Date.now(),
@@ -162,8 +172,15 @@ export const finishRound = mutation({
   handler: async (ctx, { roundId, playerId, loserId }) => {
     const round = await ctx.db.get(roundId)
     if (!round) throw new Error("Round not found")
+    if (round.status !== "pending") throw new Error("Round is not in pending phase")
 
     await verifyHostAuthorization(ctx, playerId, round.gameId)
+
+    // Verify the loser belongs to this game and is active
+    const loser = await ctx.db.get(loserId)
+    if (!loser || loser.gameId !== round.gameId || loser.hasLeft) {
+      throw new Error("Invalid loser selection")
+    }
 
     await ctx.db.patch(roundId, {
       status: "finished",
@@ -180,6 +197,11 @@ export const startNextRound = mutation({
   },
   handler: async (ctx, { gameId, playerId }) => {
     await verifyHostAuthorization(ctx, playerId, gameId)
+
+    const game = await ctx.db.get(gameId)
+    if (!game || game.status !== "active") {
+      throw new Error("Game is not active")
+    }
 
     const rounds = await ctx.db
       .query("rounds")
@@ -206,6 +228,20 @@ export const submitVote = mutation({
     votedForId: v.id("players"),
   },
   handler: async (ctx, { roundId, voterId, votedForId }) => {
+    // Verify the caller is the voter
+    const voter = await verifyPlayerIdentity(ctx, voterId)
+
+    const round = await ctx.db.get(roundId)
+    if (!round) throw new Error("Round not found")
+    if (round.status !== "voting") throw new Error("Round is not in voting phase")
+    if (round.gameId !== voter.gameId) throw new Error("Player is not in this game")
+
+    // Verify votedFor player belongs to the same game and is active
+    const votedFor = await ctx.db.get(votedForId)
+    if (!votedFor || votedFor.gameId !== round.gameId || votedFor.hasLeft) {
+      throw new Error("Invalid vote target")
+    }
+
     const existing = await ctx.db
       .query("votes")
       .withIndex("by_round_and_voter", (q) =>
@@ -220,9 +256,6 @@ export const submitVote = mutation({
     }
 
     // Auto-advance to pending when all active players have voted
-    const round = await ctx.db.get(roundId)
-    if (!round) throw new Error("Round not found")
-
     const activePlayers = await ctx.db
       .query("players")
       .withIndex("by_game", (q) => q.eq("gameId", round.gameId))
