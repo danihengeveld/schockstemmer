@@ -19,7 +19,11 @@ export function useLocalStorage(
         if (e.key === key) onStoreChange()
       }
       // Same-tab changes (dispatched manually by setValue)
-      const handleLocal = () => onStoreChange()
+      const handleLocal = (e: Event) => {
+        if (!(e instanceof CustomEvent)) return
+        const eventKey = (e as CustomEvent<{ key?: string }>).detail?.key
+        if (eventKey === key) onStoreChange()
+      }
 
       window.addEventListener("storage", handleStorage)
       window.addEventListener("local-storage-update", handleLocal)
@@ -43,7 +47,9 @@ export function useLocalStorage(
       } else {
         localStorage.setItem(key, newValue)
       }
-      window.dispatchEvent(new Event("local-storage-update"))
+      window.dispatchEvent(
+        new CustomEvent("local-storage-update", { detail: { key } }),
+      )
     },
     [key],
   )
