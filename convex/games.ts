@@ -92,6 +92,9 @@ export const joinGame = mutation({
     // Note: if a name exists with hasLeft=true, we do NOT reactivate it.
     // Guest players cannot prove they are the original owner. A new player
     // record is created instead. This prevents name-based impersonation.
+    // Trade-off: a guest who legitimately rejoins loses their voting history
+    // (stats stay on the old record). Authenticated users don't have this
+    // problem — they rejoin by Clerk ID above.
 
     // ── Create new player ─────────────────────────────────────────────
     const playerId = await ctx.db.insert("players", {
@@ -118,7 +121,8 @@ export const leaveGame = mutation({
 
     if (player.isHost) {
       // Find next host candidate — exclude the leaving player at query level
-      // to avoid race conditions where the leaving player appears in the list
+      // so they can't be selected as host before their hasLeft flag is set
+      // (the DB write happens at the end of this handler)
       const activePlayers = await ctx.db
         .query("players")
         .withIndex("by_game", (q) => q.eq("gameId", gameId))
