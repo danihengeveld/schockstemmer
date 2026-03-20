@@ -21,6 +21,7 @@ import {
 } from "@hugeicons/core-free-icons"
 import { api } from "../../../convex/_generated/api"
 import { Doc, Id } from "../../../convex/_generated/dataModel"
+import { deriveRoundResult } from "../../../convex/lib/helpers"
 import { LoserCard } from "./results/loser-card"
 import { DrinkingBuddiesCard } from "./results/drinking-buddies-card"
 import { VotingBreakdown } from "./results/voting-breakdown"
@@ -50,18 +51,8 @@ export function ResultsView({ gameId, players, votes, loserId, isHost, onLeave, 
     await finishGame({ gameId, playerId: currentPlayerId })
   }
 
-  const loser = players.find(p => p._id === loserId)
-  const loserVote = votes.find(v => v.voterId === loserId)
-  const loserVotedForSelf = loserVote?.votedForId === loserId
-
-  // Calculate shots for the loser
-  const loserShots = loserVotedForSelf ? 2 : 1
-
-  // Who voted for the loser? (Drinking Buddies)
-  const drinkingBuddies = votes
-    .filter(v => v.votedForId === loserId && v.voterId !== loserId)
-    .map(v => players.find(p => p._id === v.voterId))
-    .filter((p): p is Doc<"players"> => !!p)
+  const { loser, loserShots, loserVotedForSelf, drinkingBuddies } =
+    deriveRoundResult(loserId, players, votes)
 
   return (
     <div className="w-full max-w-2xl space-y-6 sm:space-y-8 animate-in fade-in duration-700 py-4 sm:py-8">

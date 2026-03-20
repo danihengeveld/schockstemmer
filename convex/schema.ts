@@ -20,7 +20,8 @@ export default defineSchema({
   })
     .index("by_game", ["gameId"])
     .index("by_game_and_clerk", ["gameId", "clerkId"])
-    .index("by_game_and_name", ["gameId", "name"]),
+    .index("by_game_and_name", ["gameId", "name"])
+    .index("by_clerkId", ["clerkId"]),
 
   // Rounds within a game
   rounds: defineTable({

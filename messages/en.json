@@ -55,20 +55,8 @@
     "theLoser": "The Loser",
     "shotsTotal": "{count, plural, one {# shot} other {# shots}} total",
     "lostRounds": "Lost {timesLost} of {totalRounds} rounds",
-    "hallOfShame": "Hall of Shame",
-    "shots": "Shots",
-    "worst": "Worst",
-    "left": "(Left)",
     "acrossRounds": "Across {totalRounds} rounds · {playerCount} players",
     "roundDetails": "Round Details",
-    "roundNumber": "Round {number}",
-    "shotCount": "{count, plural, one {# shot} other {# shots}}",
-    "selfVotePenalty": "Self-Vote Penalty ×2",
-    "drinkingBuddies": "Drinking Buddies",
-    "thoughtSafe": "Thought {name} was safe — 1 shot each!",
-    "votingBreakdown": "Voting Breakdown",
-    "wrong": "Wrong",
-    "safe": "Safe",
     "noRoundsTitle": "No rounds completed",
     "noRoundsDescription": "This game ended before any rounds were completed."
   },
@@ -138,20 +126,7 @@
     "left": "(Left)"
   },
   "RoundHistory": {
-    "sessionSummary": "Session Summary",
-    "hallOfShame": "Hall of Shame",
-    "shots": "Shots",
-    "worst": "Worst",
-    "left": "(Left)",
-    "roundHistory": "Round History",
-    "roundNumber": "Round {number}",
-    "shotCount": "{count, plural, one {# shot} other {# shots}}",
-    "selfVotePenalty": "Self-Vote Penalty ×2",
-    "drinkingBuddies": "Drinking Buddies",
-    "thoughtSafe": "Thought {name} was safe — 1 shot each!",
-    "votingBreakdown": "Voting Breakdown",
-    "wrong": "Wrong",
-    "safe": "Safe"
+    "sessionSummary": "Session Summary"
   },
   "Header": {
     "invite": "Invite",
@@ -188,5 +163,20 @@
     "switchLanguage": "Switch language",
     "en": "English",
     "nl": "Nederlands"
+  },
+  "GameSummary": {
+    "hallOfShame": "Hall of Shame",
+    "shots": "Shots",
+    "worst": "Worst",
+    "left": "(Left)",
+    "roundNumber": "Round {number}",
+    "shotCount": "{count, plural, one {# shot} other {# shots}}",
+    "selfVotePenalty": "Self-Vote Penalty ×2",
+    "drinkingBuddies": "Drinking Buddies",
+    "thoughtSafe": "Thought {name} was safe — 1 shot each!",
+    "votingBreakdown": "Voting Breakdown",
+    "wrong": "Wrong",
+    "safe": "Safe",
+    "roundHistory": "Round History"
   }
 }

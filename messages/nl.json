@@ -55,20 +55,8 @@
     "theLoser": "De Verliezer",
     "shotsTotal": "{count, plural, one {# shot} other {# shots}} totaal",
     "lostRounds": "{timesLost} van {totalRounds} rondes verloren",
-    "hallOfShame": "Wall of Shame",
-    "shots": "Shots",
-    "worst": "Slechtste",
-    "left": "(Weg)",
     "acrossRounds": "Over {totalRounds} rondes · {playerCount} spelers",
     "roundDetails": "Ronde Details",
-    "roundNumber": "Ronde {number}",
-    "shotCount": "{count, plural, one {# shot} other {# shots}}",
-    "selfVotePenalty": "Eigen-stem Straf ×2",
-    "drinkingBuddies": "Meedrinkers",
-    "thoughtSafe": "Dacht dat {name} veilig was — 1 shot per persoon!",
-    "votingBreakdown": "Stemoverzicht",
-    "wrong": "Fout",
-    "safe": "Veilig",
     "noRoundsTitle": "Geen rondes voltooid",
     "noRoundsDescription": "Dit spel is geëindigd voordat er rondes werden voltooid."
   },
@@ -138,20 +126,7 @@
     "left": "(Weg)"
   },
   "RoundHistory": {
-    "sessionSummary": "Sessie Samenvatting",
-    "hallOfShame": "Wall of Shame",
-    "shots": "Shots",
-    "worst": "Slechtste",
-    "left": "(Weg)",
-    "roundHistory": "Ronde Geschiedenis",
-    "roundNumber": "Ronde {number}",
-    "shotCount": "{count, plural, one {# shot} other {# shots}}",
-    "selfVotePenalty": "Eigen-stem Straf ×2",
-    "drinkingBuddies": "Meedrinkers",
-    "thoughtSafe": "Dacht dat {name} veilig was — 1 shot per persoon!",
-    "votingBreakdown": "Stemoverzicht",
-    "wrong": "Fout",
-    "safe": "Veilig"
+    "sessionSummary": "Sessie Samenvatting"
   },
   "Header": {
     "invite": "Uitnodigen",
@@ -188,5 +163,20 @@
     "switchLanguage": "Taal wisselen",
     "en": "English",
     "nl": "Nederlands"
+  },
+  "GameSummary": {
+    "hallOfShame": "Wall of Shame",
+    "shots": "Shots",
+    "worst": "Slechtste",
+    "left": "(Weg)",
+    "roundNumber": "Ronde {number}",
+    "shotCount": "{count, plural, one {# shot} other {# shots}}",
+    "selfVotePenalty": "Eigen-stem Straf ×2",
+    "drinkingBuddies": "Meedrinkers",
+    "thoughtSafe": "Dacht dat {name} veilig was — 1 shot per persoon!",
+    "votingBreakdown": "Stemoverzicht",
+    "wrong": "Fout",
+    "safe": "Veilig",
+    "roundHistory": "Ronde Geschiedenis"
   }
 }
