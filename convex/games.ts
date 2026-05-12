@@ -84,7 +84,6 @@ export const joinGame = mutation({
       .withIndex("by_game_and_name", (q) =>
         q.eq("gameId", gameId).eq("name", trimmed),
       )
-      .filter((q) => q.neq("hasLeft", true))
       .first()
 
     if (existing && !existing.hasLeft) {
