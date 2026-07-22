@@ -30,6 +30,7 @@ export function JoinGameDialog({ gameCode, onJoin }: JoinGameProps) {
 
   useEffect(() => {
     if (isSignedIn && user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(user.firstName || "")
     }
   }, [isSignedIn, user])

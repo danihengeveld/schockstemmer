@@ -23,8 +23,17 @@ import {
   Clock01Icon,
 } from "@hugeicons/core-free-icons"
 import { useTranslations } from "next-intl"
+import SignedOutRedirect from "@/components/signed-out-redirect"
 
 export default function HistoryDetailPage() {
+  return (
+    <SignedOutRedirect>
+      <HistoryDetailPageContent />
+    </SignedOutRedirect>
+  )
+}
+
+function HistoryDetailPageContent() {
   const t = useTranslations("HistoryDetail")
   const params = useParams()
   const gameId = params.gameId as Id<"games">
