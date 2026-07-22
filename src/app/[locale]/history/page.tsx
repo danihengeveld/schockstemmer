@@ -16,8 +16,17 @@ import {
   TransactionHistoryIcon
 } from "@hugeicons/core-free-icons"
 import { useTranslations } from "next-intl"
+import SignedOutRedirect from "@/components/signed-out-redirect"
 
 export default function HistoryPage() {
+  return (
+    <SignedOutRedirect>
+      <HistoryPageContent />
+    </SignedOutRedirect>
+  )
+}
+
+function HistoryPageContent() {
   const t = useTranslations("HistoryPage")
   const games = useQuery(api.games.getUserGames)
 
