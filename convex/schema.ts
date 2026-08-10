@@ -8,7 +8,9 @@ export default defineSchema({
     code: v.string(), // Short code for joining (e.g., "ABC123")
     status: v.union(v.literal("lobby"), v.literal("active"), v.literal("finished")),
     finishedAt: v.optional(v.number()),
-  }).index("by_code", ["code"]),
+  })
+    .index("by_code", ["code"])
+    .index("by_status", ["status"]),
 
   // Players in a game - can be guest or authenticated
   players: defineTable({

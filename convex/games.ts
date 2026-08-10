@@ -10,8 +10,10 @@ export const createGame = mutation({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity()
     if (!identity?.subject || !identity.givenName) {
+      console.error("createGame: rejected, unauthorized", { subject: identity?.subject })
       throw new Error("Unauthorized")
     }
+    console.debug("createGame: identity resolved", { hostClerkId: identity.subject })
 
     const code = generateGameCode()
 
@@ -28,6 +30,8 @@ export const createGame = mutation({
       isHost: true,
     })
 
+    console.info("createGame: game created", { gameId, code, hostPlayerId: playerId })
+
     return { gameId, playerId }
   },
 })
@@ -38,22 +42,28 @@ export const joinGame = mutation({
     guestName: v.string(),
   },
   handler: async (ctx, { gameId, guestName }) => {
+    console.debug("joinGame: request received", { gameId, guestName })
+
     // ── Input validation ──────────────────────────────────────────────
     const trimmed = guestName.trim()
     if (trimmed.length === 0) {
+      console.warn("joinGame: rejected, empty name", { gameId })
       return { success: false as const, error: "Name cannot be empty" }
     }
     if (trimmed.length > 50) {
+      console.warn("joinGame: rejected, name too long", { gameId })
       return { success: false as const, error: "Name must be 50 characters or less" }
     }
 
     const game = await ctx.db.get(gameId)
 
     if (!game) {
+      console.warn("joinGame: rejected, game not found", { gameId })
       return { success: false as const, error: "Game not found" }
     }
 
     if (game.status !== "lobby") {
+      console.warn("joinGame: rejected, game already started", { gameId, status: game.status })
       return { success: false as const, error: "Game already started" }
     }
 
@@ -70,10 +80,12 @@ export const joinGame = mutation({
 
       if (existingAuth) {
         if (!existingAuth.hasLeft) {
+          console.warn("joinGame: rejected, already joined", { gameId, playerId: existingAuth._id })
           return { success: false as const, error: "You already joined this game" }
         }
         // Reactivate their own record — identity is verified by Clerk JWT
         await ctx.db.patch(existingAuth._id, { hasLeft: false })
+        console.info("joinGame: authenticated player reactivated", { gameId, playerId: existingAuth._id })
         return { success: true as const, playerId: existingAuth._id }
       }
     }
@@ -87,6 +99,7 @@ export const joinGame = mutation({
       .first()
 
     if (existing && !existing.hasLeft) {
+      console.warn("joinGame: rejected, name already taken", { gameId, name: trimmed })
       return { success: false as const, error: "Name already taken" }
     }
     // Note: if a name exists with hasLeft=true, we do NOT reactivate it.
@@ -104,6 +117,8 @@ export const joinGame = mutation({
       clerkId: identity?.subject,
     })
 
+    console.info("joinGame: player joined", { gameId, playerId, guest: !identity?.subject })
+
     return { success: true as const, playerId }
   },
 })
@@ -114,8 +129,13 @@ export const leaveGame = mutation({
   },
   handler: async (ctx, { playerId }) => {
     const player = await verifyPlayerIdentity(ctx, playerId)
+    console.debug("leaveGame: request received", { playerId, gameId: player.gameId, isHost: player.isHost })
+
     // Idempotent: double-leave (e.g. from network retry) is a no-op
-    if (player.hasLeft) return
+    if (player.hasLeft) {
+      console.debug("leaveGame: no-op, player already left", { playerId })
+      return
+    }
 
     const { gameId } = player
 
@@ -141,15 +161,18 @@ export const leaveGame = mutation({
         if (newHost.clerkId) {
           await ctx.db.patch(gameId, { hostClerkId: newHost.clerkId })
         }
+        console.info("leaveGame: host handed off", { gameId, previousHost: playerId, newHost: newHost._id })
       } else {
         await ctx.db.patch(gameId, {
           status: "finished",
           finishedAt: Date.now(),
         })
+        console.info("leaveGame: game finished, no active players remain", { gameId })
       }
     }
 
     await ctx.db.patch(playerId, { hasLeft: true, isHost: false })
+    console.info("leaveGame: player left", { gameId, playerId })
   },
 })
 
@@ -160,19 +183,23 @@ export const startGame = mutation({
   },
   handler: async (ctx, { gameId, playerId }) => {
     await verifyHostAuthorization(ctx, playerId, gameId)
+    console.debug("startGame: host authorized", { gameId, playerId })
 
     const game = await ctx.db.get(gameId)
     if (!game || game.status !== "lobby") {
+      console.error("startGame: rejected, game not in lobby", { gameId, status: game?.status })
       throw new Error("Game is not in lobby")
     }
 
     await ctx.db.patch(gameId, { status: "active" })
 
-    await ctx.db.insert("rounds", {
+    const roundId = await ctx.db.insert("rounds", {
       gameId,
       roundNumber: 1,
       status: "voting",
     })
+
+    console.info("startGame: game started", { gameId, roundId })
   },
 })
 
@@ -183,9 +210,11 @@ export const finishGame = mutation({
   },
   handler: async (ctx, { gameId, playerId }) => {
     await verifyHostAuthorization(ctx, playerId, gameId)
+    console.debug("finishGame: host authorized", { gameId, playerId })
 
     const game = await ctx.db.get(gameId)
     if (!game || game.status === "finished") {
+      console.error("finishGame: rejected, already finished or not found", { gameId })
       throw new Error("Game is already finished or not found")
     }
 
@@ -193,6 +222,8 @@ export const finishGame = mutation({
       status: "finished",
       finishedAt: Date.now(),
     })
+
+    console.info("finishGame: game finished manually", { gameId })
   },
 })
 
@@ -204,14 +235,22 @@ export const finishRound = mutation({
   },
   handler: async (ctx, { roundId, playerId, loserId }) => {
     const round = await ctx.db.get(roundId)
-    if (!round) throw new Error("Round not found")
-    if (round.status !== "pending") throw new Error("Round is not in pending phase")
+    if (!round) {
+      console.error("finishRound: rejected, round not found", { roundId })
+      throw new Error("Round not found")
+    }
+    if (round.status !== "pending") {
+      console.error("finishRound: rejected, round not pending", { roundId, status: round.status })
+      throw new Error("Round is not in pending phase")
+    }
 
     await verifyHostAuthorization(ctx, playerId, round.gameId)
+    console.debug("finishRound: host authorized", { roundId, playerId, loserId })
 
     // Verify the loser belongs to this game and is active
     const loser = await ctx.db.get(loserId)
     if (!loser || loser.gameId !== round.gameId || loser.hasLeft) {
+      console.error("finishRound: rejected, invalid loser selection", { roundId, loserId })
       throw new Error("Invalid loser selection")
     }
 
@@ -220,6 +259,8 @@ export const finishRound = mutation({
       loserId,
       finishedAt: Date.now(),
     })
+
+    console.info("finishRound: round finished", { roundId, gameId: round.gameId, loserId })
   },
 })
 
@@ -230,9 +271,11 @@ export const startNextRound = mutation({
   },
   handler: async (ctx, { gameId, playerId }) => {
     await verifyHostAuthorization(ctx, playerId, gameId)
+    console.debug("startNextRound: host authorized", { gameId, playerId })
 
     const game = await ctx.db.get(gameId)
     if (!game || game.status !== "active") {
+      console.error("startNextRound: rejected, game not active", { gameId, status: game?.status })
       throw new Error("Game is not active")
     }
 
@@ -246,11 +289,13 @@ export const startNextRound = mutation({
       0,
     )
 
-    await ctx.db.insert("rounds", {
+    const roundId = await ctx.db.insert("rounds", {
       gameId,
       roundNumber: maxRound + 1,
       status: "voting",
     })
+
+    console.info("startNextRound: round started", { gameId, roundId, roundNumber: maxRound + 1 })
   },
 })
 
@@ -263,15 +308,26 @@ export const submitVote = mutation({
   handler: async (ctx, { roundId, voterId, votedForId }) => {
     // Verify the caller is the voter
     const voter = await verifyPlayerIdentity(ctx, voterId)
+    console.debug("submitVote: voter verified", { roundId, voterId, votedForId })
 
     const round = await ctx.db.get(roundId)
-    if (!round) throw new Error("Round not found")
-    if (round.status !== "voting") throw new Error("Round is not in voting phase")
-    if (round.gameId !== voter.gameId) throw new Error("Player is not in this game")
+    if (!round) {
+      console.error("submitVote: rejected, round not found", { roundId })
+      throw new Error("Round not found")
+    }
+    if (round.status !== "voting") {
+      console.error("submitVote: rejected, round not in voting phase", { roundId, status: round.status })
+      throw new Error("Round is not in voting phase")
+    }
+    if (round.gameId !== voter.gameId) {
+      console.error("submitVote: rejected, voter not in this game", { roundId, voterId, gameId: round.gameId })
+      throw new Error("Player is not in this game")
+    }
 
     // Verify votedFor player belongs to the same game and is active
     const votedFor = await ctx.db.get(votedForId)
     if (!votedFor || votedFor.gameId !== round.gameId || votedFor.hasLeft) {
+      console.error("submitVote: rejected, invalid vote target", { roundId, votedForId })
       throw new Error("Invalid vote target")
     }
 
@@ -284,8 +340,10 @@ export const submitVote = mutation({
 
     if (existing) {
       await ctx.db.patch(existing._id, { votedForId })
+      console.info("submitVote: vote updated", { roundId, voterId, votedForId })
     } else {
       await ctx.db.insert("votes", { roundId, voterId, votedForId })
+      console.info("submitVote: vote recorded", { roundId, voterId, votedForId })
     }
 
     // Auto-advance to pending when all active players have voted
@@ -300,8 +358,11 @@ export const submitVote = mutation({
       .withIndex("by_round", (q) => q.eq("roundId", roundId))
       .collect()
 
+    console.debug("submitVote: vote tally", { roundId, votes: voteCount.length, activePlayers: activePlayers.length })
+
     if (voteCount.length >= activePlayers.length) {
       await ctx.db.patch(roundId, { status: "pending" })
+      console.info("submitVote: round advanced to pending", { roundId, gameId: round.gameId })
     }
   },
 })
@@ -313,13 +374,18 @@ export const getGameByCode = query({
   handler: async (ctx, { code }) => {
     // Validate format before hitting the database — reject obviously invalid codes
     if (!GAME_CODE_REGEX.test(code)) {
+      console.warn("getGameByCode: rejected, invalid code format", { code })
       return null
     }
 
-    return await ctx.db
+    const game = await ctx.db
       .query("games")
       .withIndex("by_code", (q) => q.eq("code", code))
       .first()
+
+    console.debug("getGameByCode: lookup complete", { code, found: !!game })
+
+    return game
   },
 })
 
@@ -331,7 +397,10 @@ export const getGame = query({
   args: { gameId: v.id("games") },
   handler: async (ctx, { gameId }) => {
     const game = await ctx.db.get(gameId)
-    if (!game) return null
+    if (!game) {
+      console.warn("getGame: rejected, game not found", { gameId })
+      return null
+    }
 
     const players = await ctx.db
       .query("players")
@@ -355,6 +424,14 @@ export const getGame = query({
           .withIndex("by_round", (q) => q.eq("roundId", activeRound._id))
           .collect()
       : []
+
+    console.debug("getGame: fetched", {
+      gameId,
+      status: game.status,
+      players: players.length,
+      rounds: rounds.length,
+      activeRoundId: activeRound?._id,
+    })
 
     return {
       game,
@@ -381,13 +458,17 @@ export const getGameHistory = query({
   args: { gameId: v.id("games") },
   handler: async (ctx, { gameId }) => {
     const game = await ctx.db.get(gameId)
-    if (!game) return null
+    if (!game) {
+      console.warn("getGameHistory: rejected, game not found", { gameId })
+      return null
+    }
 
     const identity = await ctx.auth.getUserIdentity()
 
     // For finished games, require the caller to be an authenticated participant
     if (game.status === "finished") {
       if (!identity?.subject) {
+        console.warn("getGameHistory: rejected, unauthenticated access to finished game", { gameId })
         return null
       }
       const participant = await ctx.db
@@ -397,6 +478,10 @@ export const getGameHistory = query({
         )
         .first()
       if (!participant) {
+        console.warn("getGameHistory: rejected, non-participant access to finished game", {
+          gameId,
+          clerkId: identity.subject,
+        })
         return null
       }
     }
@@ -423,6 +508,13 @@ export const getGameHistory = query({
       )
     ).flat()
 
+    console.debug("getGameHistory: fetched", {
+      gameId,
+      players: players.length,
+      rounds: rounds.length,
+      votes: allVotes.length,
+    })
+
     return { game, players, rounds, allVotes }
   },
 })
@@ -436,6 +528,7 @@ export const getUserGames = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity()
     if (!identity?.subject) {
+      console.error("getUserGames: rejected, not authenticated")
       throw new Error("Not authenticated")
     }
 
@@ -444,7 +537,10 @@ export const getUserGames = query({
       .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
       .collect()
 
-    if (playerRecords.length === 0) return []
+    if (playerRecords.length === 0) {
+      console.debug("getUserGames: no games found", { clerkId: identity.subject })
+      return []
+    }
 
     const gameIds = [...new Set(playerRecords.map((p) => p.gameId))]
 
@@ -520,12 +616,16 @@ export const getUserGames = query({
       }),
     )
 
-    return games
+    const sorted = games
       .filter((g): g is NonNullable<typeof g> => g !== null)
       .sort(
         (a, b) =>
           (b.finishedAt ?? b._creationTime) -
           (a.finishedAt ?? a._creationTime),
       )
+
+    console.debug("getUserGames: fetched", { clerkId: identity.subject, games: sorted.length })
+
+    return sorted
   },
 })

@@ -8,9 +8,11 @@
  * @module
  */
 
+import type * as crons from "../crons.js";
 import type * as games from "../games.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_helpers from "../lib/helpers.js";
+import type * as maintenance from "../maintenance.js";
 
 import type {
   ApiFromModules,
@@ -19,9 +21,11 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  crons: typeof crons;
   games: typeof games;
   "lib/auth": typeof lib_auth;
   "lib/helpers": typeof lib_helpers;
+  maintenance: typeof maintenance;
 }>;
 
 /**

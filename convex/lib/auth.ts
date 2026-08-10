@@ -17,13 +17,21 @@ export async function verifyPlayerIdentity(
 ): Promise<Doc<"players">> {
   const player = await ctx.db.get(playerId)
   if (!player) {
+    console.error("verifyPlayerIdentity: rejected, player not found", { playerId })
     throw new Error("Player not found")
   }
 
   const identity = await ctx.auth.getUserIdentity()
   if (player.clerkId && (!identity || identity.subject !== player.clerkId)) {
+    console.error("verifyPlayerIdentity: rejected, identity mismatch", {
+      playerId,
+      expectedClerkId: player.clerkId,
+      actualSubject: identity?.subject,
+    })
     throw new Error("Unauthorized: identity mismatch")
   }
+
+  console.debug("verifyPlayerIdentity: verified", { playerId, gameId: player.gameId })
 
   return player
 }
@@ -39,6 +47,12 @@ export async function verifyHostAuthorization(
   const player = await verifyPlayerIdentity(ctx, playerId)
 
   if (player.gameId !== gameId || !player.isHost) {
+    console.error("verifyHostAuthorization: rejected, not the host", {
+      playerId,
+      gameId,
+      playerGameId: player.gameId,
+      isHost: player.isHost,
+    })
     throw new Error("Only the host can perform this action")
   }
 }
